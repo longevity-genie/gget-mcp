@@ -1,2 +1,521 @@
 # gget-mcp
-Bioinformatic MCP server that wraps the most useful functions of the gget library
+
+[![Tests](https://github.com/antonkulaga/gget-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/antonkulaga/gget-mcp/actions/workflows/test.yml)
+[![PyPI version](https://badge.fury.io/py/gget-mcp.svg)](https://badge.fury.io/py/gget-mcp)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
+MCP (Model Context Protocol) server for the [gget](https://github.com/pachterlab/gget) bioinformatics library.
+
+This server implements the Model Context Protocol (MCP) for gget, providing a standardized interface for accessing powerful bioinformatics tools and databases. MCP enables AI assistants and agents to perform complex genomics queries through structured interfaces.
+
+The gget bioinformatics toolkit provides efficient querying of genomic databases and includes functions for:
+- Gene and sequence information retrieval
+- BLAST and sequence alignment
+- Protein structure prediction
+- Gene expression analysis
+- Functional enrichment analysis
+- And much more!
+
+If you want to understand more about what the Model Context Protocol is and how to use it more efficiently, you can take the [DeepLearning AI Course](https://www.deeplearning.ai/short-courses/mcp-build-rich-context-ai-apps-with-anthropic/) or search for MCP videos on YouTube.
+
+## About MCP (Model Context Protocol)
+
+MCP is a protocol that bridges the gap between AI systems and specialized domain tools. It enables:
+
+- **Structured Access**: Direct connection to powerful bioinformatics tools and databases
+- **Natural Language Queries**: Simplified interaction with complex genomics workflows
+- **Type Safety**: Strong typing and validation through FastMCP
+- **AI Integration**: Seamless integration with AI assistants and agents
+
+## Available Tools
+
+This server provides comprehensive bioinformatics functionality through gget:
+
+### Gene Information & Search
+- **`gget_search`**: Find Ensembl IDs associated with search terms
+- **`gget_info`**: Fetch detailed information for Ensembl IDs
+- **`gget_seq`**: Retrieve nucleotide or amino acid sequences
+- **`gget_ref`**: Get reference genome information from Ensembl
+
+### Sequence Analysis
+- **`gget_blast`**: BLAST nucleotide or amino acid sequences
+- **`gget_blat`**: Find genomic locations of sequences
+- **`gget_muscle`**: Align multiple sequences
+
+### Expression & Functional Analysis
+- **`gget_archs4`**: Get gene expression data from ARCHS4
+- **`gget_enrichr`**: Perform gene set enrichment analysis
+
+### Protein Structure & Function
+- **`gget_pdb`**: Fetch protein structure data from PDB
+- **`gget_alphafold`**: Predict protein structure using AlphaFold
+
+### Cancer & Mutation Analysis
+- **`gget_cosmic`**: Search COSMIC database for cancer mutations
+
+### Single-cell Analysis
+- **`gget_cellxgene`**: Query single-cell RNA-seq data from CellxGene
+
+## Quick Start
+
+### Installing uv
+
+```bash
+# Download and install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Verify installation
+uv --version
+uvx --version
+```
+
+uvx is a very nice tool that can run a python package installing it if needed.
+
+### Running with uvx
+
+You can run the gget-mcp server directly using uvx without cloning the repository:
+
+```bash
+# Run the server in streamed http mode (default)
+uvx gget-mcp
+```
+
+<details>
+<summary>Other uvx modes (STDIO, HTTP, SSE)</summary>
+
+#### STDIO Mode (for MCP clients that require stdio, can be useful when you want to save files)
+
+```bash
+# Or explicitly specify stdio mode
+uvx gget-mcp stdio
+```
+
+#### HTTP Mode (Web Server)
+```bash
+# Run the server in streamable HTTP mode on default (3002) port
+uvx gget-mcp server
+
+# Run on a specific port
+uvx gget-mcp server --port 8000
+```
+
+#### SSE Mode (Server-Sent Events)
+```bash
+# Run the server in SSE mode
+uvx gget-mcp sse
+```
+
+</details>
+
+In cases when there are problems with uvx often they can be caused by cleaning uv cache:
+```
+uv cache clean
+```
+
+The HTTP mode will start a web server that you can access at `http://localhost:3002/mcp` (with documentation at `http://localhost:3002/docs`). The STDIO mode is designed for MCP clients that communicate via standard input/output, while SSE mode uses Server-Sent Events for real-time communication.
+
+**Note:** Currently, we do not have a Swagger/OpenAPI interface, so accessing the server directly in your browser will not show much useful information. To explore the available tools and capabilities, you should either use the MCP Inspector (see below) or connect through an MCP client to see the available tools.
+
+## Configuring your AI Client (Anthropic Claude Desktop, Cursor, Windsurf, etc.)
+
+We provide preconfigured JSON files for different use cases:
+
+- **For STDIO mode (recommended):** Use `mcp-config-stdio.json`
+- **For HTTP mode:** Use `mcp-config.json` 
+- **For local development:** Use `mcp-config-stdio-debug.json`
+
+### Configuration Video Tutorial
+
+For a visual guide on how to configure MCP servers with AI clients, check out our [configuration tutorial video](https://www.youtube.com/watch?v=Xo0sHWGJvE0) for our sister MCP server (biothings-mcp). The configuration principles are exactly the same for the gget MCP server - just use the appropriate JSON configuration files provided above.
+
+### Inspecting gget MCP server
+
+<details>
+<summary>Using MCP Inspector to explore server capabilities</summary>
+
+If you want to inspect the methods provided by the MCP server, use npx (you may need to install nodejs and npm):
+
+For STDIO mode with uvx:
+```bash
+npx @modelcontextprotocol/inspector --config mcp-config-stdio.json --server gget-mcp
+```
+
+For HTTP mode (ensure server is running first):
+```bash
+npx @modelcontextprotocol/inspector --config mcp-config.json --server gget-mcp
+```
+
+For local development:
+```bash
+npx @modelcontextprotocol/inspector --config mcp-config-stdio-debug.json --server gget-mcp
+```
+
+You can also run the inspector manually and configure it through the interface:
+```bash
+npx @modelcontextprotocol/inspector
+```
+
+After that you can explore the tools and resources with MCP Inspector at http://127.0.0.1:6274 (note, if you run inspector several times it can change port)
+
+</details>
+
+### Integration with AI Systems
+
+Simply point your AI client (like Cursor, Windsurf, ClaudeDesktop, VS Code with Copilot, or [others](https://github.com/punkpeye/awesome-mcp-clients)) to use the appropriate configuration file from the repository.
+
+## Repository setup
+
+```bash
+# Clone the repository
+git clone https://github.com/antonkulaga/gget-mcp.git
+cd gget-mcp
+uv sync
+```
+
+### Running the MCP Server
+
+If you already cloned the repo you can run the server with uv:
+
+```bash
+# Start the MCP server locally (HTTP mode)
+uv run server
+
+# Or start in STDIO mode  
+uv run stdio
+
+# Or start in SSE mode
+uv run sse
+```
+
+## Examples
+
+### Search for genes
+```python
+# Through MCP client
+result = await client.call_tool("gget_search", {
+    "search_terms": ["BRCA1", "breast cancer"],
+    "species": "homo_sapiens",
+    "limit": 10
+})
+```
+
+### Get gene information
+```python
+result = await client.call_tool("gget_info", {
+    "ensembl_ids": ["ENSG00000012048"],
+    "verbose": True
+})
+```
+
+### BLAST a sequence
+```python
+result = await client.call_tool("gget_blast", {
+    "sequence": "ATGCGATCGATCG",
+    "program": "blastn",
+    "database": "nt",
+    "limit": 20
+})
+```
+
+### Get expression data
+```python
+result = await client.call_tool("gget_archs4", {
+    "gene": "BRCA1",
+    "which": "tissue",
+    "species": "human"
+})
+```
+
+### Protein structure prediction
+```python
+result = await client.call_tool("gget_alphafold", {
+    "sequence": "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK"
+})
+```
+
+## Safety Features
+
+- **Input validation**: Comprehensive parameter validation for all gget functions
+- **Error handling**: Robust error handling with informative messages
+- **Rate limiting**: Respectful usage of external APIs and databases
+- **Data validation**: Type checking and data format validation
+
+## Testing & Verification
+
+The MCP server is provided with comprehensive tests including both unit tests and integration tests for network-dependent operations.
+
+### Running Tests
+
+Run tests for the MCP server:
+```bash
+# Run all tests (excluding expensive judge tests)
+uv run pytest -vvv -m "not judge"
+
+# Run only fast tests (skip slow, integration, and judge tests)
+uv run pytest -vvv -m "not slow and not integration and not judge"
+
+# Run only integration tests
+uv run pytest -vvv -m integration
+
+# Run judge tests (expensive LLM tests - requires API keys and may cost money)
+uv run pytest test/test_judge.py -vvv
+
+# Run tests with coverage (excluding judge tests)
+uv run pytest -vvv --cov=src/gget_mcp --cov-report=term-missing -m "not judge"
+```
+
+**Note on Judge Tests**: The judge tests (`test_judge.py`) use large language models to evaluate the AI agent's performance with gget tools. These tests:
+- Are automatically excluded from CI/CD to avoid costs
+- Require API keys (GEMINI_API_KEY or similar) 
+- May incur charges from LLM API providers
+- Are designed for local development and manual evaluation
+- Provide valuable insights into how well the tools work with AI agents
+
+### GitHub Actions Workflows
+
+This project includes several GitHub Actions workflows:
+
+- **CI** (`.github/workflows/ci.yml`): Runs on every push/PR with basic linting and fast tests
+- **Tests** (`.github/workflows/test.yml`): Comprehensive testing across multiple OS and Python versions
+  - Fast tests on all platforms
+  - Integration tests (may require network access)
+  - Slow tests (like BLAST operations) - runs only on Ubuntu with Python 3.11
+  - Code coverage reporting
+  - Security checks with bandit and safety
+- **Publish** (`.github/workflows/publish.yml`): Publishes to PyPI when tags are pushed
+
+You can use MCP inspector with locally built MCP server same way as with uvx.
+
+*Note: Using the MCP Inspector is optional. Most MCP clients (like Cursor, Windsurf, etc.) will automatically display the available tools from this server once configured. However, the Inspector can be useful for detailed testing and exploration.*
+
+*If you choose to use the Inspector via `npx`, ensure you have Node.js and npm installed. Using [nvm](https://github.com/nvm-sh/nvm) (Node Version Manager) is recommended for managing Node.js versions.*
+
+## Usage Example
+
+Here's how the gget MCP server works in practice with AI assistants:
+
+### Example Conversation: Gene Analysis Workflow
+
+**👤 User:** "I need to analyze the TP53 gene. Can you find its Ensembl ID, get detailed information, and then retrieve its protein sequence?"
+
+**🤖 AI Assistant:** I'll help you analyze the TP53 gene step by step using the gget tools.
+
+First, let me search for the TP53 gene to find its Ensembl ID:
+
+*[Uses gget_search tool]*
+
+Great! I found the TP53 gene. The Ensembl ID is **ENSG00000141510**. TP53 is located on chromosome 17 and encodes the tumor protein p53, a crucial tumor suppressor.
+
+Now let me get detailed information about this gene:
+
+*[Uses gget_info tool]*
+
+Here are the key details for TP53:
+- **Gene symbol:** TP53  
+- **Gene type:** protein_coding
+- **Chromosome:** 17 (positions 7,661,779-7,687,550)
+- **Strand:** -1 (reverse strand)
+- **Description:** tumor protein p53
+
+Finally, let me retrieve the protein sequence:
+
+*[Uses gget_seq tool with translate=True]*
+
+The TP53 protein sequence is 393 amino acids long, starting with: `MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSRHKKLMFKTEGPDSD`
+
+This protein sequence can now be used for further analysis like structure prediction or functional annotation.
+
+**👤 User:** "Now can you check if there are any cancer mutations in COSMIC for TP53?"
+
+**🤖 AI Assistant:** I'll search the COSMIC database for cancer mutations in the TP53 gene.
+
+*[Uses gget_cosmic tool]*
+
+Here are some key findings from COSMIC for TP53:
+- TP53 is one of the most frequently mutated genes in cancer
+- Common hotspot mutations include R175H, G245S, R248Q, R273H, and R282W
+- These mutations are found across many cancer types including breast, lung, colorectal, and ovarian cancers
+- Most mutations are missense mutations that affect the DNA-binding domain
+- TP53 mutations are associated with poor prognosis in many cancer types
+
+**👤 User:** "What about functional enrichment? Can you analyze what pathways are associated with a set of DNA repair genes: TP53, BRCA1, BRCA2, ATM, CHEK2?"
+
+**🤖 AI Assistant:** I'll perform a functional enrichment analysis on your DNA repair gene set using Enrichr.
+
+*[Uses gget_enrichr tool]*
+
+The enrichment analysis reveals several key pathways for your DNA repair genes:
+
+**Top enriched pathways:**
+1. **DNA Damage Response** (p < 0.001)
+   - All genes (TP53, BRCA1, BRCA2, ATM, CHEK2) are involved
+2. **Homologous Recombination** (p < 0.001) 
+   - BRCA1, BRCA2, ATM are key players
+3. **Cell Cycle Checkpoints** (p < 0.001)
+   - TP53, ATM, CHEK2 control G1/S and G2/M checkpoints
+4. **BRCA1-Associated Genome Surveillance Complex** (p < 0.001)
+   - BRCA1, ATM, CHEK2 participate in this complex
+5. **p53 Signaling Pathway** (p < 0.001)
+   - TP53, ATM, CHEK2 are central to p53 activation
+
+This confirms that your gene set is highly enriched for DNA repair and genome stability functions, which is expected given their roles in cancer predisposition syndromes.
+
+### Example Conversation: Protein Structure Analysis
+
+**👤 User:** "I have this protein sequence: MSKGEELFTGVVPILVELDGDVNGHKFSV... Can you predict its 3D structure and tell me what protein this might be?"
+
+**🤖 AI Assistant:** I'll help you analyze this protein sequence. Let me first identify what protein this is using BLAST, then predict its structure.
+
+*[Uses gget_blast tool]*
+
+Based on the BLAST results, this appears to be **Green Fluorescent Protein (GFP)**! The sequence shows high similarity to GFP from *Aequorea victoria*.
+
+Now let me predict its 3D structure using AlphaFold:
+
+*[Uses gget_alphafold tool]*
+
+The AlphaFold prediction shows:
+- **Confidence:** Very high (>90%) for most residues
+- **Structure:** Classic beta-barrel fold with central chromophore
+- **Key regions:** 
+  - Beta-barrel structure (residues 30-228) - very high confidence
+  - Chromophore region (residues 65-67: Tyr66) - high confidence
+  - Terminal regions - lower confidence (typical for flexible ends)
+
+This structure is consistent with GFP's function as a fluorescent protein, where the beta-barrel protects the central chromophore and creates the fluorescent properties.
+
+## Example Questions That MCP Helps Answer
+
+<details>
+<summary>Bioinformatics research questions you can explore with this MCP server</summary>
+
+### Gene Discovery & Information
+* "What genes are associated with Alzheimer's disease?"
+* "Find all genes on chromosome 21 related to Down syndrome"
+* "Get the genomic coordinates and transcript variants for the EGFR gene"
+* "What are the orthologs of human BRCA1 in model organisms?"
+
+### Sequence Analysis
+* "BLAST this DNA sequence to identify its origin: ATGGCGCCCGAACAGGGAC"
+* "Align these protein sequences and find conserved domains"
+* "What's the reading frame and protein translation of this sequence?"
+* "Find the genomic location of this primer sequence"
+
+### Protein Structure & Function
+* "Predict the 3D structure of this novel protein sequence"
+* "Get the crystal structure of insulin from PDB"
+* "Find functional domains in the p53 protein sequence"
+* "What are the structural similarities between these proteins?"
+
+### Gene Expression & Regulation
+* "Which genes are highly expressed in brain tissue vs liver?"
+* "Get single-cell expression data for ACE2 in lung cells"
+* "What's the tissue-specific expression pattern of MYC?"
+* "Find genes co-expressed with TP53 across tissues"
+
+### Disease & Drug Discovery
+* "What mutations in COSMIC are associated with lung cancer?"
+* "Find diseases associated with the APOE gene using OpenTargets"
+* "Which drugs target the EGFR pathway?"
+* "What cancer types show TP53 mutations most frequently?"
+
+### Functional Analysis
+* "Perform pathway enrichment for these differentially expressed genes"
+* "What biological processes are enriched in this gene set?"
+* "Find transcription factor binding sites in these promoters"
+* "Analyze the functional annotations for these proteins"
+
+### Comparative Genomics
+* "Compare the protein sequences of insulin across species"
+* "Find syntenic regions between human and mouse genomes"
+* "What are the evolutionary relationships of HOX genes?"
+* "Identify species-specific gene duplications"
+
+### Workflow Examples
+* "Complete analysis of BRCA1: sequence, structure, expression, and disease associations"
+* "Characterize this protein: BLAST → structure prediction → functional domains"
+* "Gene discovery pipeline: search → validate → expression → pathway analysis"
+* "Cancer gene analysis: mutations → pathways → drug targets"
+
+</details>
+
+## Contributing
+
+We welcome contributions from the community! 🎉 Whether you're a researcher, developer, or enthusiast interested in bioinformatics and genomics research, there are many ways to get involved:
+
+**We especially encourage you to try our MCP server and share your feedback with us!** Your experience using the server, any issues you encounter, and suggestions for improvement are incredibly valuable for making this tool better for the entire research community.
+
+### Ways to Contribute
+
+- **🐛 Bug Reports**: Found an issue? Please open a GitHub issue with detailed information
+- **💡 Feature Requests**: Have ideas for new functionality? We'd love to hear them!
+- **📝 Documentation**: Help improve our documentation, examples, or tutorials
+- **🧪 Testing**: Add test cases, especially for edge cases or new query patterns
+- **🔍 Data Quality**: Help identify and report data inconsistencies or suggest improvements
+- **🚀 Performance**: Optimize queries, improve caching, or enhance server performance
+- **🌐 Integration**: Create examples for new MCP clients or AI systems
+- **🎥 Tutorials & Videos**: Create tutorials, video guides, or educational content showing how to use MCP servers
+- **📖 User Stories**: Share your research workflows and success stories using our MCP servers
+- **🤝 Community Outreach**: Help us evangelize MCP adoption in the bioinformatics community
+
+**Tutorials, videos, and user stories are especially valuable to us!** We're working to push the bioinformatics community toward AI adoption, and real-world examples of how researchers use our MCP servers help demonstrate the practical benefits and encourage wider adoption.
+
+### Getting Started
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes and add tests
+4. Run the test suite (`uv run pytest`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to your branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Development Guidelines
+
+- Follow the existing code style (we use `ruff` for formatting and linting)
+- Add tests for new functionality
+- Update documentation as needed
+- Keep commits focused and write clear commit messages
+
+### Questions or Ideas?
+
+Don't hesitate to open an issue for discussion! We're friendly and always happy to help newcomers get started. Your contributions help advance open science and bioinformatics research for everyone. 🧬✨
+
+## Known Issues
+
+### External Dependencies
+Some gget functions depend on external web services and databases that may occasionally be unavailable or rate-limited. The server implements proper error handling and retries where appropriate.
+
+### Test Coverage
+While we provide comprehensive tests including integration tests for network-dependent operations, some test cases may be sensitive to external service availability. Some automated test results may need manual validation.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Acknowledgments
+
+- [gget](https://github.com/pachterlab/gget) - The amazing bioinformatics toolkit this server wraps
+- [FastMCP](https://github.com/jlowin/fastmcp) - The MCP server framework used
+- [Model Context Protocol](https://modelcontextprotocol.io/) - The protocol specification
+
+### Other MCP Servers by Longevity Genie
+
+We also develop other specialized MCP servers for biomedical research:
+
+- **[biothings-mcp](https://github.com/longevity-genie/biothings-mcp)** - MCP server for BioThings.io APIs, providing access to gene annotation (mygene.info), variant annotation (myvariant.info), and chemical compound data (mychem.info)
+- **[opengenes-mcp](https://github.com/longevity-genie/opengenes-mcp)** - MCP server for OpenGenes database, providing access to aging and longevity research data
+
+We are supported by:
+
+[![HEALES](https://github.com/longevity-genie/biothings-mcp/raw/main/images/heales.jpg)](https://heales.org/)
+
+*HEALES - Healthy Life Extension Society*
+
+and
+
+[![IBIMA](https://github.com/longevity-genie/biothings-mcp/raw/main/images/IBIMA.jpg)](https://ibima.med.uni-rostock.de/)
+
+[IBIMA - Institute for Biostatistics and Informatics in Medicine and Ageing Research](https://ibima.med.uni-rostock.de/)

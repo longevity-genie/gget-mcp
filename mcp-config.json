@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gget-mcp": {
+      "command": "uvx",
+      "args": ["gget-mcp", "server"]
+    }
+  }
+} 

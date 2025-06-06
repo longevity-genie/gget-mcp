@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "gget-mcp": {
+      "command": "uv",
+      "args": ["run", "stdio"],
+      "env": {
+        "MCP_PORT": "3002",
+        "MCP_HOST": "0.0.0.0",
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  }
+} 
