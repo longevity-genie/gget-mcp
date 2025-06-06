@@ -1,5 +1,4 @@
 import sys
-import json
 import pytest
 import os
 from pathlib import Path
@@ -8,7 +7,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
 
 from dotenv import load_dotenv
-from just_agents import llm_options
 from just_agents.base_agent import BaseAgent
 from gget_mcp.server import GgetMCP
 
@@ -200,12 +198,12 @@ GENERATED ANSWER: {generated_answer}
     print(f"Judge: {judge_result}")
     
     if "PASS" not in judge_result.upper():
-        print(f"\n=== JUDGE FAILED ===")
+        print("\n=== JUDGE FAILED ===")
         print(f"Question: {question}")
         print(f"Reference Answer: {reference_answer}")
         print(f"Generated Answer: {generated_answer}")
         print(f"Judge Reasoning: {judge_result}")
-        print(f"===================")
+        print("===================")
     
     assert "PASS" in judge_result.upper(), f"Judge failed for question: {question}\nReason: {judge_result}"
 

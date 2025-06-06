@@ -1,8 +1,7 @@
 """Tests for gget-mcp server functionality."""
 
 import pytest
-import asyncio
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 from gget_mcp.server import GgetMCP
 
 

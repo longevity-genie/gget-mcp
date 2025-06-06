@@ -1,19 +1,12 @@
 #!/usr/bin/env python3
 """gget MCP Server - Bioinformatics query interface using the gget library."""
 
-import asyncio
 import os
-import tempfile
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Union
-import sys
+from typing import List, Optional, Union
 
 from fastmcp import FastMCP
-from pydantic import BaseModel, Field
 from eliot import start_action
 import gget
-import pandas as pd
-from Bio.SeqUtils import seq1
 
 # Configuration
 DEFAULT_HOST = os.getenv("MCP_HOST", "0.0.0.0")

@@ -7,7 +7,6 @@ for testing purposes.
 """
 
 import asyncio
-import json
 from gget_mcp.server import GgetMCP
 
 async def test_gget_functions():

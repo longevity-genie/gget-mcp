@@ -1,6 +1,6 @@
 # gget-mcp
 
-[![Tests](https://github.com/antonkulaga/gget-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/antonkulaga/gget-mcp/actions/workflows/test.yml)
+[![Tests](https://github.com/longevity-genie/gget-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/longevity-genie/gget-mcp/actions/workflows/test.yml)
 [![PyPI version](https://badge.fury.io/py/gget-mcp.svg)](https://badge.fury.io/py/gget-mcp)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -18,7 +18,31 @@ The gget bioinformatics toolkit provides efficient querying of genomic databases
 - Functional enrichment analysis
 - And much more!
 
-If you want to understand more about what the Model Context Protocol is and how to use it more efficiently, you can take the [DeepLearning AI Course](https://www.deeplearning.ai/short-courses/mcp-build-rich-context-ai-apps-with-anthropic/) or search for MCP videos on YouTube.
+## 🚀 Quick Example: What Can You Do?
+
+Here's how the gget MCP server works in practice with AI assistants:
+
+**👤 User:** "Analyze the TP53 gene - find its details and protein sequence, then check for cancer mutations"
+
+**🤖 AI Assistant:** I'll help you analyze TP53 step by step:
+
+*[Uses gget_search]* → Found TP53 (ENSG00000141510) on chromosome 17  
+*[Uses gget_info]* → TP53 is a protein-coding tumor suppressor gene  
+*[Uses gget_seq with translate=True]* → Retrieved 393 amino acid protein sequence  
+*[Uses gget_cosmic]* → Found hotspot mutations R175H, R248Q, R273H in multiple cancers
+
+**👤 User:** "Now predict the 3D structure of this protein sequence: MSKGEELFTGVVPILVEL..."
+
+**🤖 AI Assistant:** Let me analyze this sequence:
+
+*[Uses gget_blast]* → Identified as Green Fluorescent Protein (GFP)  
+*[Uses gget_alphafold]* → Predicted classic beta-barrel structure with 90%+ confidence
+
+**👤 User:** "Perform pathway enrichment for DNA repair genes: TP53, BRCA1, BRCA2, ATM"
+
+**🤖 AI Assistant:** *[Uses gget_enrichr]* → Top pathways: DNA Damage Response, Homologous Recombination, Cell Cycle Checkpoints, p53 Signaling
+
+**See how powerful this is?** You can now ask natural language questions about genes, sequences, mutations, and pathways - the AI does the complex bioinformatics work for you!
 
 ## About MCP (Model Context Protocol)
 
@@ -28,6 +52,8 @@ MCP is a protocol that bridges the gap between AI systems and specialized domain
 - **Natural Language Queries**: Simplified interaction with complex genomics workflows
 - **Type Safety**: Strong typing and validation through FastMCP
 - **AI Integration**: Seamless integration with AI assistants and agents
+
+If you want to understand more about what the Model Context Protocol is and how to use it more efficiently, you can take the [DeepLearning AI Course](https://www.deeplearning.ai/short-courses/mcp-build-rich-context-ai-apps-with-anthropic/) or search for MCP videos on YouTube.
 
 ## Available Tools
 
@@ -169,7 +195,7 @@ Simply point your AI client (like Cursor, Windsurf, ClaudeDesktop, VS Code with 
 
 ```bash
 # Clone the repository
-git clone https://github.com/antonkulaga/gget-mcp.git
+git clone https://github.com/longevity-genie/gget-mcp.git
 cd gget-mcp
 uv sync
 ```
@@ -292,99 +318,7 @@ You can use MCP inspector with locally built MCP server same way as with uvx.
 
 *If you choose to use the Inspector via `npx`, ensure you have Node.js and npm installed. Using [nvm](https://github.com/nvm-sh/nvm) (Node Version Manager) is recommended for managing Node.js versions.*
 
-## Usage Example
 
-Here's how the gget MCP server works in practice with AI assistants:
-
-### Example Conversation: Gene Analysis Workflow
-
-**👤 User:** "I need to analyze the TP53 gene. Can you find its Ensembl ID, get detailed information, and then retrieve its protein sequence?"
-
-**🤖 AI Assistant:** I'll help you analyze the TP53 gene step by step using the gget tools.
-
-First, let me search for the TP53 gene to find its Ensembl ID:
-
-*[Uses gget_search tool]*
-
-Great! I found the TP53 gene. The Ensembl ID is **ENSG00000141510**. TP53 is located on chromosome 17 and encodes the tumor protein p53, a crucial tumor suppressor.
-
-Now let me get detailed information about this gene:
-
-*[Uses gget_info tool]*
-
-Here are the key details for TP53:
-- **Gene symbol:** TP53  
-- **Gene type:** protein_coding
-- **Chromosome:** 17 (positions 7,661,779-7,687,550)
-- **Strand:** -1 (reverse strand)
-- **Description:** tumor protein p53
-
-Finally, let me retrieve the protein sequence:
-
-*[Uses gget_seq tool with translate=True]*
-
-The TP53 protein sequence is 393 amino acids long, starting with: `MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSRHKKLMFKTEGPDSD`
-
-This protein sequence can now be used for further analysis like structure prediction or functional annotation.
-
-**👤 User:** "Now can you check if there are any cancer mutations in COSMIC for TP53?"
-
-**🤖 AI Assistant:** I'll search the COSMIC database for cancer mutations in the TP53 gene.
-
-*[Uses gget_cosmic tool]*
-
-Here are some key findings from COSMIC for TP53:
-- TP53 is one of the most frequently mutated genes in cancer
-- Common hotspot mutations include R175H, G245S, R248Q, R273H, and R282W
-- These mutations are found across many cancer types including breast, lung, colorectal, and ovarian cancers
-- Most mutations are missense mutations that affect the DNA-binding domain
-- TP53 mutations are associated with poor prognosis in many cancer types
-
-**👤 User:** "What about functional enrichment? Can you analyze what pathways are associated with a set of DNA repair genes: TP53, BRCA1, BRCA2, ATM, CHEK2?"
-
-**🤖 AI Assistant:** I'll perform a functional enrichment analysis on your DNA repair gene set using Enrichr.
-
-*[Uses gget_enrichr tool]*
-
-The enrichment analysis reveals several key pathways for your DNA repair genes:
-
-**Top enriched pathways:**
-1. **DNA Damage Response** (p < 0.001)
-   - All genes (TP53, BRCA1, BRCA2, ATM, CHEK2) are involved
-2. **Homologous Recombination** (p < 0.001) 
-   - BRCA1, BRCA2, ATM are key players
-3. **Cell Cycle Checkpoints** (p < 0.001)
-   - TP53, ATM, CHEK2 control G1/S and G2/M checkpoints
-4. **BRCA1-Associated Genome Surveillance Complex** (p < 0.001)
-   - BRCA1, ATM, CHEK2 participate in this complex
-5. **p53 Signaling Pathway** (p < 0.001)
-   - TP53, ATM, CHEK2 are central to p53 activation
-
-This confirms that your gene set is highly enriched for DNA repair and genome stability functions, which is expected given their roles in cancer predisposition syndromes.
-
-### Example Conversation: Protein Structure Analysis
-
-**👤 User:** "I have this protein sequence: MSKGEELFTGVVPILVELDGDVNGHKFSV... Can you predict its 3D structure and tell me what protein this might be?"
-
-**🤖 AI Assistant:** I'll help you analyze this protein sequence. Let me first identify what protein this is using BLAST, then predict its structure.
-
-*[Uses gget_blast tool]*
-
-Based on the BLAST results, this appears to be **Green Fluorescent Protein (GFP)**! The sequence shows high similarity to GFP from *Aequorea victoria*.
-
-Now let me predict its 3D structure using AlphaFold:
-
-*[Uses gget_alphafold tool]*
-
-The AlphaFold prediction shows:
-- **Confidence:** Very high (>90%) for most residues
-- **Structure:** Classic beta-barrel fold with central chromophore
-- **Key regions:** 
-  - Beta-barrel structure (residues 30-228) - very high confidence
-  - Chromophore region (residues 65-67: Tyr66) - high confidence
-  - Terminal regions - lower confidence (typical for flexible ends)
-
-This structure is consistent with GFP's function as a fluorescent protein, where the beta-barrel protects the central chromophore and creates the fluorescent properties.
 
 ## Example Questions That MCP Helps Answer
 
@@ -507,6 +441,7 @@ We also develop other specialized MCP servers for biomedical research:
 
 - **[biothings-mcp](https://github.com/longevity-genie/biothings-mcp)** - MCP server for BioThings.io APIs, providing access to gene annotation (mygene.info), variant annotation (myvariant.info), and chemical compound data (mychem.info)
 - **[opengenes-mcp](https://github.com/longevity-genie/opengenes-mcp)** - MCP server for OpenGenes database, providing access to aging and longevity research data
+- **[synergy-age-mcp](https://github.com/longevity-genie/synergy-age-mcp)** - MCP server for SynergyAge database, providing access to synergistic and antagonistic longevity gene interactions
 
 We are supported by:
 
