@@ -8,6 +8,8 @@
 
 MCP (Model Context Protocol) server for the [gget](https://github.com/pachterlab/gget) bioinformatics library.
 
+![gget-mcp Example](images/screenshot_example.png)
+
 This server implements the Model Context Protocol (MCP) for gget, providing a standardized interface for accessing powerful bioinformatics tools and databases. MCP enables AI assistants and agents to perform complex genomics queries through structured interfaces.
 
 The gget bioinformatics toolkit provides efficient querying of genomic databases and includes functions for:
@@ -20,7 +22,8 @@ The gget bioinformatics toolkit provides efficient querying of genomic databases
 
 ## 🚀 Quick Example: What Can You Do?
 
-Here's how the gget MCP server works in practice with AI assistants:
+<details>
+<summary>See how the gget MCP server works in practice with AI assistants</summary>
 
 **👤 User:** "Analyze the TP53 gene - find its details and protein sequence, then check for cancer mutations"
 
@@ -44,7 +47,12 @@ Here's how the gget MCP server works in practice with AI assistants:
 
 **See how powerful this is?** You can now ask natural language questions about genes, sequences, mutations, and pathways - the AI does the complex bioinformatics work for you!
 
+</details>
+
 ## About MCP (Model Context Protocol)
+
+<details>
+<summary>Learn more about the Model Context Protocol</summary>
 
 MCP is a protocol that bridges the gap between AI systems and specialized domain tools. It enables:
 
@@ -55,9 +63,12 @@ MCP is a protocol that bridges the gap between AI systems and specialized domain
 
 If you want to understand more about what the Model Context Protocol is and how to use it more efficiently, you can take the [DeepLearning AI Course](https://www.deeplearning.ai/short-courses/mcp-build-rich-context-ai-apps-with-anthropic/) or search for MCP videos on YouTube.
 
+</details>
+
 ## Available Tools
 
-This server provides comprehensive bioinformatics functionality through gget:
+<details>
+<summary>Comprehensive bioinformatics functionality through gget</summary>
 
 ### Gene Information & Search
 - **`gget_search`**: Find Ensembl IDs associated with search terms
@@ -84,9 +95,12 @@ This server provides comprehensive bioinformatics functionality through gget:
 ### Single-cell Analysis
 - **`gget_cellxgene`**: Query single-cell RNA-seq data from CellxGene
 
+</details>
+
 ## Quick Start
 
-### Installing uv
+<details>
+<summary>Installing uv (optional - uvx can auto-install)</summary>
 
 ```bash
 # Download and install uv
@@ -98,6 +112,8 @@ uvx --version
 ```
 
 uvx is a very nice tool that can run a python package installing it if needed.
+
+</details>
 
 ### Running with uvx
 
@@ -193,6 +209,9 @@ Simply point your AI client (like Cursor, Windsurf, ClaudeDesktop, VS Code with 
 
 ## Repository setup
 
+<details>
+<summary>For developers: cloning and running locally</summary>
+
 ```bash
 # Clone the repository
 git clone https://github.com/longevity-genie/gget-mcp.git
@@ -215,51 +234,7 @@ uv run stdio
 uv run sse
 ```
 
-## Examples
-
-### Search for genes
-```python
-# Through MCP client
-result = await client.call_tool("gget_search", {
-    "search_terms": ["BRCA1", "breast cancer"],
-    "species": "homo_sapiens",
-    "limit": 10
-})
-```
-
-### Get gene information
-```python
-result = await client.call_tool("gget_info", {
-    "ensembl_ids": ["ENSG00000012048"],
-    "verbose": True
-})
-```
-
-### BLAST a sequence
-```python
-result = await client.call_tool("gget_blast", {
-    "sequence": "ATGCGATCGATCG",
-    "program": "blastn",
-    "database": "nt",
-    "limit": 20
-})
-```
-
-### Get expression data
-```python
-result = await client.call_tool("gget_archs4", {
-    "gene": "BRCA1",
-    "which": "tissue",
-    "species": "human"
-})
-```
-
-### Protein structure prediction
-```python
-result = await client.call_tool("gget_alphafold", {
-    "sequence": "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK"
-})
-```
+</details>
 
 ## Safety Features
 
@@ -269,6 +244,9 @@ result = await client.call_tool("gget_alphafold", {
 - **Data validation**: Type checking and data format validation
 
 ## Testing & Verification
+
+<details>
+<summary>Developer information: Testing and CI/CD workflows</summary>
 
 The MCP server is provided with comprehensive tests including both unit tests and integration tests for network-dependent operations.
 
@@ -314,66 +292,28 @@ This project includes several GitHub Actions workflows:
 
 You can use MCP inspector with locally built MCP server same way as with uvx.
 
+</details>
+
 *Note: Using the MCP Inspector is optional. Most MCP clients (like Cursor, Windsurf, etc.) will automatically display the available tools from this server once configured. However, the Inspector can be useful for detailed testing and exploration.*
 
 *If you choose to use the Inspector via `npx`, ensure you have Node.js and npm installed. Using [nvm](https://github.com/nvm-sh/nvm) (Node Version Manager) is recommended for managing Node.js versions.*
 
+## Example Questions from Test Suite
 
+Here are validated example questions that you can ask the AI assistant when using this MCP server:
 
-## Example Questions That MCP Helps Answer
+* "Find information about the human TP53 gene and get its protein sequence."
+* "What are the orthologs of BRCA1 gene across different species?"
+* "Perform enrichment analysis for a set of cancer-related genes: TP53, BRCA1, BRCA2, ATM, CHEK2."
+* "Get the 3D structure information for the protein encoded by the EGFR gene."
+* "Find mutations in the COSMIC database for the PIK3CA gene."
+* "Analyze gene expression patterns for insulin (INS) gene across different tissues."
+* "Perform BLAST search with a DNA sequence to identify its origin: ATGGCGCCCGAACAGGGAC."
+* "Find diseases associated with the APOE gene using OpenTargets."
+* "Get reference genome information for mouse (Mus musculus)."
+* "Align multiple protein sequences and identify conserved regions."
 
-<details>
-<summary>Bioinformatics research questions you can explore with this MCP server</summary>
-
-### Gene Discovery & Information
-* "What genes are associated with Alzheimer's disease?"
-* "Find all genes on chromosome 21 related to Down syndrome"
-* "Get the genomic coordinates and transcript variants for the EGFR gene"
-* "What are the orthologs of human BRCA1 in model organisms?"
-
-### Sequence Analysis
-* "BLAST this DNA sequence to identify its origin: ATGGCGCCCGAACAGGGAC"
-* "Align these protein sequences and find conserved domains"
-* "What's the reading frame and protein translation of this sequence?"
-* "Find the genomic location of this primer sequence"
-
-### Protein Structure & Function
-* "Predict the 3D structure of this novel protein sequence"
-* "Get the crystal structure of insulin from PDB"
-* "Find functional domains in the p53 protein sequence"
-* "What are the structural similarities between these proteins?"
-
-### Gene Expression & Regulation
-* "Which genes are highly expressed in brain tissue vs liver?"
-* "Get single-cell expression data for ACE2 in lung cells"
-* "What's the tissue-specific expression pattern of MYC?"
-* "Find genes co-expressed with TP53 across tissues"
-
-### Disease & Drug Discovery
-* "What mutations in COSMIC are associated with lung cancer?"
-* "Find diseases associated with the APOE gene using OpenTargets"
-* "Which drugs target the EGFR pathway?"
-* "What cancer types show TP53 mutations most frequently?"
-
-### Functional Analysis
-* "Perform pathway enrichment for these differentially expressed genes"
-* "What biological processes are enriched in this gene set?"
-* "Find transcription factor binding sites in these promoters"
-* "Analyze the functional annotations for these proteins"
-
-### Comparative Genomics
-* "Compare the protein sequences of insulin across species"
-* "Find syntenic regions between human and mouse genomes"
-* "What are the evolutionary relationships of HOX genes?"
-* "Identify species-specific gene duplications"
-
-### Workflow Examples
-* "Complete analysis of BRCA1: sequence, structure, expression, and disease associations"
-* "Characterize this protein: BLAST → structure prediction → functional domains"
-* "Gene discovery pipeline: search → validate → expression → pathway analysis"
-* "Cancer gene analysis: mutations → pathways → drug targets"
-
-</details>
+These questions are taken directly from our automated test suite and are validated to work correctly with the available gget tools.
 
 ## Contributing
 
@@ -419,11 +359,16 @@ Don't hesitate to open an issue for discussion! We're friendly and always happy 
 
 ## Known Issues
 
+<details>
+<summary>Technical limitations and considerations</summary>
+
 ### External Dependencies
 Some gget functions depend on external web services and databases that may occasionally be unavailable or rate-limited. The server implements proper error handling and retries where appropriate.
 
 ### Test Coverage
 While we provide comprehensive tests including integration tests for network-dependent operations, some test cases may be sensitive to external service availability. Some automated test results may need manual validation.
+
+</details>
 
 ## License
 
