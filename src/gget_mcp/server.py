@@ -1486,7 +1486,7 @@ def create_app(transport_mode: str = "stdio", output_dir: Optional[str] = None):
 cli_app = typer.Typer(help="gget MCP Server CLI")
 
 @cli_app.command()
-def run_server(
+def server(
     host: Annotated[str, typer.Option(help="Host to run the server on.")] = DEFAULT_HOST,
     port: Annotated[int, typer.Option(help="Port to run the server on.")] = DEFAULT_PORT,
     transport: Annotated[str, typer.Option(help="Transport type: stdio, stdio-local, streamable-http, or sse")] = DEFAULT_TRANSPORT,
@@ -1505,6 +1505,16 @@ def run_server(
         app.run(transport="stdio")  # Both stdio modes use stdio transport
     else:
         app.run(transport=transport, host=host, port=port)
+
+@cli_app.command(name="server-local")
+def server_local(
+    host: Annotated[str, typer.Option(help="Host to run the server on.")] = DEFAULT_HOST,
+    port: Annotated[int, typer.Option(help="Port to run the server on.")] = DEFAULT_PORT,
+    output_dir: Annotated[Optional[str], typer.Option(help="Output directory for local files")] = None
+):
+    """Runs the gget MCP server in stdio-local mode (saves large files locally)."""
+    app = create_app(transport_mode="stdio-local", output_dir=output_dir)
+    app.run(transport="stdio")
 
 if __name__ == "__main__":
     cli_app() 
