@@ -162,11 +162,78 @@ The HTTP mode will start a web server that you can access at `http://localhost:3
 
 ## Configuring your AI Client (Anthropic Claude Desktop, Cursor, Windsurf, etc.)
 
-We provide preconfigured JSON files for different use cases:
+We provide preconfigured JSON files for different use cases. Here are the actual configuration examples:
 
-- **For STDIO mode (recommended):** Use `mcp-config-stdio.json`
-- **For HTTP mode:** Use `mcp-config.json` 
-- **For local development:** Use `mcp-config-stdio-debug.json`
+### STDIO Mode Configuration (Recommended)
+
+Use this configuration for most AI clients. Create or update your MCP configuration file:
+
+```json
+{
+  "mcpServers": {
+    "gget-mcp": {
+      "command": "uvx",
+      "args": ["gget-mcp", "stdio"]
+    }
+  }
+}
+```
+
+### HTTP Mode Configuration
+
+For HTTP mode, ensure the server is running first with `uvx gget-mcp server`:
+
+```json
+{
+  "mcpServers": {
+    "gget-mcp": {
+      "command": "uvx",
+      "args": ["gget-mcp", "server"]
+    }
+  }
+}
+```
+
+### STDIO-Local Mode Configuration (File Saving)
+
+Use this mode when you want to save large output files (sequences, structures, alignments) to disk instead of returning them as text:
+
+```json
+{
+  "mcpServers": {
+    "gget-mcp": {
+      "command": "uvx",
+      "args": ["gget-mcp", "server", "--transport", "stdio-local", "--output-dir", "./gget_output"]
+    }
+  }
+}
+```
+
+### Local Development Configuration
+
+For local development when you've cloned the repository:
+
+```json
+{
+  "mcpServers": {
+    "gget-mcp": {
+      "command": "uv",
+      "args": ["run", "stdio"],
+      "env": {
+        "MCP_PORT": "3002",
+        "MCP_HOST": "0.0.0.0",
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  }
+}
+```
+
+**Files Available:**
+- **STDIO mode:** `mcp-config-stdio.json`
+- **HTTP mode:** `mcp-config.json` 
+- **STDIO-Local mode:** `mcp-config-stdio-local.json`
+- **Local development:** `mcp-config-stdio-debug.json`
 
 ### Configuration Video Tutorial
 

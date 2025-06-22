@@ -15,13 +15,11 @@ dependencies = [
     "gget>=0.29.1",
     "pandas>=2.0.0",
     "biopython>=1.84",
+    "typer>=0.16.0",
 ]
 
 [project.scripts]
-gget-mcp = "gget_mcp.server:cli_app_stdio"
-server = "gget_mcp.server:cli_app"
-stdio = "gget_mcp.server:cli_app_stdio"
-sse = "gget_mcp.server:cli_app_sse"
+gget-mcp = "gget_mcp.server:cli_app"
 
 [build-system]
 requires = ["hatchling"]
