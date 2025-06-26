@@ -151,6 +151,7 @@ class GgetMCP(GgetMCPExtended):
     ) -> SearchResult:
         """Search for specific genes using gene symbols with enhanced search strategy.
         
+        🚀 **BATCH PROCESSING SUPPORTED**: This function can process multiple genes in a single call!
         Use this tool FIRST when you have gene names/symbols and need to find their Ensembl IDs.
         Returns Ensembl IDs which are required for get_gene_info and get_sequences tools.
         
@@ -161,28 +162,29 @@ class GgetMCP(GgetMCPExtended):
         Examples:
         - Instead of: "APP" 
         - Use: "APP amyloid precursor" or "APP amyloid beta precursor protein"
-        - Instead of: "BACE1"
-        - Use: "BACE1 beta secretase" or "BACE1 beta site amyloid precursor"
-        - Instead of: "MAPT"
-        - Use: "MAPT microtubule tau" or "MAPT microtubule associated protein"
+        - Instead of: ["BACE1", "MAPT"]
+        - Use: ["BACE1 beta secretase", "MAPT microtubule tau"]
         
         This function uses AND search for multi-word terms and OR search for single words.
         
         Args:
-            search_terms: Gene symbols with descriptive terms (e.g., 'APP amyloid precursor' or ['BACE1 beta secretase', 'MAPT tau'])
+            search_terms: SINGLE gene symbol OR LIST of gene symbols with descriptive terms
+                         Single: 'APP amyloid precursor'
+                         Batch: ['BACE1 beta secretase', 'MAPT tau', 'APOE apolipoprotein']
             species: Target species (e.g., 'homo_sapiens', 'mus_musculus')
             id_type: "gene" (default) or "transcript" - whether to return genes or transcripts
         
         Returns:
             SearchResult: DataFrame with gene search results containing Ensembl IDs and descriptions
+                         Results from ALL search terms are combined in a single response
             
-        Example (RECOMMENDED):
+        Example (SINGLE GENE):
             Input: search_terms='APP amyloid precursor', species='homo_sapiens'
             Output: DataFrame with APP gene and related genes
             
-        Example (may fail):
-            Input: search_terms='APP', species='homo_sapiens'
-            Output: May return unrelated genes or no results
+        Example (BATCH PROCESSING, limit number of queries to 3-5 to avoid timeouts):
+            Input: search_terms=['APOE apolipoprotein', 'APP amyloid', 'PSEN1 presenilin'], species='homo_sapiens'
+            Output: DataFrame with ALL three genes and their Ensembl IDs in one response
         
         Downstream tools that need the Ensembl IDs from this search:
             - get_gene_info: Get detailed gene information  
@@ -294,7 +296,7 @@ class GgetMCP(GgetMCPExtended):
             SequenceResult: List containing the requested sequences in FASTA format
         
         Example workflow for protein sequence:
-            1. search_genes('TP53', 'homo_sapiens') → 'ENSG00000141510'
+            1. search_genes('TP53 protein', 'homo_sapiens') → 'ENSG00000141510'
             2. get_sequences('ENSG00000141510', translate=True)
             
         Example output:
