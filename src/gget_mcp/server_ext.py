@@ -31,7 +31,7 @@ StructureResult = Union[Dict[str, Any], str]
 SearchResult = Dict[str, Any]
 LocalFileResult = Dict[Literal["path", "format", "success", "error"], Any]
 
-class GgetMCP(FastMCP):
+class GgetMCPExtended(FastMCP):
     """gget MCP Server with bioinformatics tools."""
     
     def __init__(
@@ -59,21 +59,20 @@ class GgetMCP(FastMCP):
         self, 
         data: Any, 
         format_type: str, 
-        base_name: Optional[str] = None
+        output_path: Optional[str] = None,
+        default_prefix: str = "gget_output"
     ) -> LocalFileResult:
         """Helper function to save data to local files.
         
         Args:
             data: The data to save
             format_type: File format ('fasta', 'afa', 'pdb', 'json', etc.)
-            base_name: Base name for the file (optional, will generate UUID if not provided)
+            output_path: Full output path (absolute or relative) or None to auto-generate
+            default_prefix: Prefix for auto-generated filenames
             
         Returns:
             LocalFileResult: Contains path, format, success status, and optional error information
         """
-        if base_name is None:
-            base_name = str(uuid.uuid4())
-            
         # Map format types to file extensions
         format_extensions = {
             'fasta': '.fasta',
@@ -85,7 +84,26 @@ class GgetMCP(FastMCP):
         }
         
         extension = format_extensions.get(format_type, '.txt')
-        file_path = self.output_dir / f"{base_name}{extension}"
+        
+        if output_path is None:
+            # Generate a unique filename in the default output directory
+            base_name = f"{default_prefix}_{str(uuid.uuid4())[:8]}"
+            file_path = self.output_dir / f"{base_name}{extension}"
+        else:
+            # Use the provided path
+            path_obj = Path(output_path)
+            if path_obj.is_absolute():
+                # Absolute path - use as is, but ensure it has the right extension
+                if path_obj.suffix != extension:
+                    file_path = path_obj.with_suffix(extension)
+                else:
+                    file_path = path_obj
+            else:
+                # Relative path - concatenate with output directory
+                if not str(output_path).endswith(extension):
+                    file_path = self.output_dir / f"{output_path}{extension}"
+                else:
+                    file_path = self.output_dir / output_path
         
         try:
             if format_type in ['fasta', 'afa']:
@@ -1291,13 +1309,10 @@ class GgetMCP(FastMCP):
         with start_action(action_type="gget_seq_local", ensembl_ids=ensembl_ids, translate=translate):
             result = gget.seq(ens_ids=ensembl_ids, translate=translate, isoforms=isoforms, verbose=verbose)
             
-            # Generate base name from ensembl IDs
-            base_name = f"sequences_{'_'.join(ensembl_ids[:3])}{'_protein' if translate else '_dna'}"
-            if output_path:
-                base_name = Path(output_path).stem
-                
             # Save to file
-            return self._save_to_local_file(result, format, base_name)
+            ensembl_list = ensembl_ids if isinstance(ensembl_ids, list) else [ensembl_ids]
+            default_prefix = f"sequences_{'_'.join(ensembl_list[:3])}{'_protein' if translate else '_dna'}"
+            return self._save_to_local_file(result, format, output_path, default_prefix)
 
     async def get_pdb_structure_local(
         self, 
@@ -1324,12 +1339,9 @@ class GgetMCP(FastMCP):
         """
         with start_action(action_type="gget_pdb_local", pdb_id=pdb_id):
             result = gget.pdb(pdb_id=pdb_id, resource=resource, identifier=identifier, save=save)
-            
-            base_name = f"structure_{pdb_id}_{resource}"
-            if output_path:
-                base_name = Path(output_path).stem
                 
-            return self._save_to_local_file(result, format, base_name)
+            default_prefix = f"structure_{pdb_id}_{resource}"
+            return self._save_to_local_file(result, format, output_path, default_prefix)
 
     async def alphafold_predict_local(
         self, 
@@ -1374,12 +1386,9 @@ class GgetMCP(FastMCP):
                 show_sidechains=show_sidechains,
                 verbose=verbose
             )
-            
-            base_name = f"alphafold_prediction_{str(uuid.uuid4())[:8]}"
-            if output_path:
-                base_name = Path(output_path).stem
                 
-            return self._save_to_local_file(result, format, base_name)
+            default_prefix = f"alphafold_prediction_{str(uuid.uuid4())[:8]}"
+            return self._save_to_local_file(result, format, output_path, default_prefix)
 
     async def muscle_align_local(
         self, 
@@ -1403,13 +1412,33 @@ class GgetMCP(FastMCP):
             Battle testing confirmed successful alignment of real biological sequences
         """
         with start_action(action_type="gget_muscle_local", num_sequences=len(sequences) if isinstance(sequences, list) else None):
-            # Generate output file path
-            base_name = f"muscle_alignment_{len(sequences)}seqs"
-            if output_path:
-                base_name = Path(output_path).stem
-                
-            extension = ".fasta" if format == "fasta" else ".afa"
-            file_path = self.output_dir / f"{base_name}{extension}"
+            # Map format types to file extensions
+            format_extensions = {
+                'fasta': '.fasta',
+                'afa': '.afa'
+            }
+            extension = format_extensions.get(format, '.fasta')
+            
+            # Handle output path
+            if output_path is None:
+                # Generate a unique filename in the default output directory
+                base_name = f"muscle_alignment_{len(sequences)}seqs_{str(uuid.uuid4())[:8]}"
+                file_path = self.output_dir / f"{base_name}{extension}"
+            else:
+                # Use the provided path
+                path_obj = Path(output_path)
+                if path_obj.is_absolute():
+                    # Absolute path - use as is, but ensure it has the right extension
+                    if path_obj.suffix != extension:
+                        file_path = path_obj.with_suffix(extension)
+                    else:
+                        file_path = path_obj
+                else:
+                    # Relative path - concatenate with output directory
+                    if not str(output_path).endswith(extension):
+                        file_path = self.output_dir / f"{output_path}{extension}"
+                    else:
+                        file_path = self.output_dir / output_path
             
             # Use gget.muscle with out parameter to save directly to file
             result = gget.muscle(fasta=sequences, super5=super5, out=str(file_path), verbose=verbose)
@@ -1466,45 +1495,12 @@ class GgetMCP(FastMCP):
                 verbose=verbose,
                 out=out
             )
-            
-            base_name = f"diamond_alignment_{str(uuid.uuid4())[:8]}"
-            if output_path:
-                base_name = Path(output_path).stem
                 
             # Convert result to dict if it has to_dict method
             if hasattr(result, 'to_dict'):
                 result = result.to_dict()
                 
-            return self._save_to_local_file(result, format, base_name)
+            default_prefix = f"diamond_alignment_{str(uuid.uuid4())[:8]}"
+            return self._save_to_local_file(result, format, output_path, default_prefix)
 
 
-def create_app(transport_mode: str = "stdio", output_dir: Optional[str] = None):
-    """Create and configure the FastMCP application."""
-    return GgetMCP(transport_mode=transport_mode, output_dir=output_dir)
-
-# CLI application setup
-cli_app = typer.Typer(help="gget MCP Server CLI")
-
-@cli_app.command()
-def run_server(
-    host: Annotated[str, typer.Option(help="Host to run the server on.")] = DEFAULT_HOST,
-    port: Annotated[int, typer.Option(help="Port to run the server on.")] = DEFAULT_PORT,
-    transport: Annotated[str, typer.Option(help="Transport type: stdio, stdio-local, streamable-http, or sse")] = DEFAULT_TRANSPORT,
-    output_dir: Annotated[Optional[str], typer.Option(help="Output directory for local files (stdio-local mode)")] = None
-):
-    """Runs the gget MCP server."""
-    # Validate transport value
-    if transport not in ["stdio", "stdio-local", "streamable-http", "sse"]:
-        typer.echo(f"Invalid transport: {transport}. Must be one of: stdio, stdio-local, streamable-http, sse")
-        raise typer.Exit(1)
-        
-    app = create_app(transport_mode=transport, output_dir=output_dir)
-
-    # Different transports need different arguments
-    if transport in ["stdio", "stdio-local"]:
-        app.run(transport="stdio")  # Both stdio modes use stdio transport
-    else:
-        app.run(transport=transport, host=host, port=port)
-
-if __name__ == "__main__":
-    cli_app() 

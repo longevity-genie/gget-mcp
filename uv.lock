@@ -984,7 +984,7 @@ wheels = [
 
 [[package]]
 name = "gget-mcp"
-version = "0.1.3"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "biopython" },
@@ -992,8 +992,11 @@ dependencies = [
     { name = "fastapi" },
     { name = "fastmcp" },
     { name = "gget" },
+    { name = "openmm" },
     { name = "pandas" },
+    { name = "py3dmol" },
     { name = "pycomfort" },
+    { name = "simtk" },
     { name = "typer" },
 ]
 
@@ -1014,8 +1017,11 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115.12" },
     { name = "fastmcp", specifier = ">=2.7.0" },
     { name = "gget", specifier = ">=0.29.1" },
+    { name = "openmm", specifier = ">=8.3.0" },
     { name = "pandas", specifier = ">=2.0.0" },
+    { name = "py3dmol", specifier = ">=2.5.0" },
     { name = "pycomfort", specifier = ">=0.0.18" },
+    { name = "simtk", specifier = ">=0.1.0" },
     { name = "typer", specifier = ">=0.16.0" },
 ]
 
@@ -2347,6 +2353,32 @@ wheels = [
 ]
 
 [[package]]
+name = "openmm"
+version = "8.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/c2/37882d0a99b020a9e2e0a717611aa99711d9786b2e04732e57396732b961/openmm-8.3.0-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:619c0524d5ef1140c67ce873dd61d8099a439f996d9b3e9db697184b984ae9d8", size = 12912875, upload-time = "2025-06-17T21:25:05.303Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/5f/ba4212abeb6ed1ae2e1f37a7912a527d2a5d7b78b7287d2afffbf872a278/openmm-8.3.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:766f7650fa71ac20fc7ad8fc0d86a1a953fe39f5a52d35106545d4d4ea564355", size = 12487218, upload-time = "2025-06-17T21:25:10.698Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/54/01d8ad6e51d74c9f0f112746b3fcbe45f7f866d610d2c9f60c7a32239336/openmm-8.3.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7aa7f7d286de23f8eeb1df1e2aaf8fdbfd5e899a1d7a54ff65da2aec1cad8178", size = 13982628, upload-time = "2025-06-17T21:25:18.627Z" },
+    { url = "https://files.pythonhosted.org/packages/32/8c/c34e381e839afeaeebd1bd6e5e69e31a446bb76422ff76d1a1e6438ff689/openmm-8.3.0-cp310-cp310-win_amd64.whl", hash = "sha256:6c41982926691c68660824ccb6e6a03f9e2fc77bc5372c7cbadc36d0996be682", size = 12815633, upload-time = "2025-06-17T21:25:23.205Z" },
+    { url = "https://files.pythonhosted.org/packages/ba/04/d2a95e4024c34707a486360e15b7a90a874c55feac7b0f80d37a8fb4178d/openmm-8.3.0-cp311-cp311-macosx_10_12_x86_64.whl", hash = "sha256:8b700799b2e4a0874806536dacbc5c25449284580a35dd38f1f97e89ad4ab0d7", size = 12913995, upload-time = "2025-06-17T21:25:28.757Z" },
+    { url = "https://files.pythonhosted.org/packages/95/7f/523ed6f57e990730172cc8f327610e0938a236bacbfd78ac0e4d11ee4254/openmm-8.3.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:789e31b1c942630d9925b943528a6fa2ca809b2b2f72fec58924b2c5f8fbb379", size = 12488525, upload-time = "2025-06-17T21:25:34.492Z" },
+    { url = "https://files.pythonhosted.org/packages/45/72/19d19e923fcf350fbb8ca88a45e2ff4e54330cc67a77fb452a1d04cd0562/openmm-8.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:454e8cf739d18f4c4fb3ee326961e13a35811f20ccdedcdbd0a17e81abf8fbcd", size = 13983914, upload-time = "2025-06-17T21:25:40.04Z" },
+    { url = "https://files.pythonhosted.org/packages/8a/3e/47dfbe7df19206dba793991e97e1a83409d82142cecd06af0d11d7fb6603/openmm-8.3.0-cp311-cp311-win_amd64.whl", hash = "sha256:2cadf3f9acfa702f5ce603b27396bbda0c450ad4f0eec1c37f82ca1f1e69882b", size = 12815504, upload-time = "2025-06-17T21:25:47.271Z" },
+    { url = "https://files.pythonhosted.org/packages/18/ae/d9a2899a91b791a3e619f7952fb5028594b18a3978597c027717ad190461/openmm-8.3.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:9d35361763ad1f585c96c700fd3bf2016d4d68d0c842ccdcb57bb0ffe72d76dc", size = 12913851, upload-time = "2025-06-17T21:25:52.922Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/42/d669e279fab7c31a02b8c7cea2a1f40c0aeaf3648683466e665639f709be/openmm-8.3.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:6e75f2ddddc88fd206f57897be40657d515ed847c0d7a400d7773493f0ce7172", size = 12486383, upload-time = "2025-06-17T21:25:57.735Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/c6/d51c88c8ac7544548feb2bf0c80ea995071487c1fd707462a5ddf7cf3371/openmm-8.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b35242739b3fa45cd340bc0f285a87b99cf9b98b4b262090dc71b852fb26e2b1", size = 13987507, upload-time = "2025-06-17T21:26:03.197Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/0f/3a5450f7bef11a3151506f5000549a79d5d398d555353f8bba70ad93752b/openmm-8.3.0-cp312-cp312-win_amd64.whl", hash = "sha256:557bc46e04b0db77c425c3cfd9615c4160a80d918d2ec5a617b48a18f2db83b8", size = 12817370, upload-time = "2025-06-17T21:26:08.924Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/27/0b65642dd50ab4388c9647d72f197ef6c46007801d4eef27f9ceb085c9b2/openmm-8.3.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:67d933becd4768da6756275a246d594185c0f57046e9fa8fd10f9f512168f0a1", size = 12912960, upload-time = "2025-06-17T21:26:18.759Z" },
+    { url = "https://files.pythonhosted.org/packages/f9/27/29f64b5a33695cb8ca8cf315cf553b636adfabe8de7b6288845d9fb30e01/openmm-8.3.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:6bcd75b72e4512a7436ee1d34ff947c101eb883603725aa34201f3632dc9876c", size = 12485111, upload-time = "2025-06-17T21:26:23.629Z" },
+    { url = "https://files.pythonhosted.org/packages/52/e6/112efdbab7907ecc683059d5ab92036c6e8da8031bdafba7bd5a6737a01e/openmm-8.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d37c10e4102f4b930af7dd08d740eb1b2244ca5b92a41285883cfd42117e0f85", size = 13985506, upload-time = "2025-06-17T21:26:29.795Z" },
+    { url = "https://files.pythonhosted.org/packages/56/72/99b83fe195286d60c41bb8e301a481ef9ada92be6ffd9ce8c73eaf52e948/openmm-8.3.0-cp313-cp313-win_amd64.whl", hash = "sha256:ee168c415b510171129983ddd3376edd5310f39986ee64c262b7706642c2e416", size = 12815850, upload-time = "2025-06-17T21:26:35.536Z" },
+]
+
+[[package]]
 name = "orjson"
 version = "3.10.18"
 source = { registry = "https://pypi.org/simple" }
@@ -2744,6 +2776,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/cd/05/0a34433a064256a578f1783a10da6df098ceaa4a57bbeaa96a6c0352786b/pure_eval-0.2.3.tar.gz", hash = "sha256:5f4e983f40564c576c7c8635ae88db5956bb2229d7e9237d03b3c0b0190eaf42", size = 19752, upload-time = "2024-07-21T12:58:21.801Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8e/37/efad0257dc6e593a18957422533ff0f87ede7c9c6ea010a2177d738fb82f/pure_eval-0.2.3-py3-none-any.whl", hash = "sha256:1db8e35b67b3d218d818ae653e27f06c3aa420901fa7b081ca98cbedc874e0d0", size = 11842, upload-time = "2024-07-21T12:58:20.04Z" },
+]
+
+[[package]]
+name = "py3dmol"
+version = "2.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/01/3fb3be3a054614fe505fe362f975607bbec99de6b8aedfd66e9038e7d401/py3dmol-2.5.0.tar.gz", hash = "sha256:a6d424f98de652e0e8e3e8bbf298e267d613060f14c317e2ffb94f46a3c7f766", size = 7821, upload-time = "2025-06-03T19:46:47.915Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ee/56/e830ccd2a387d03c24c760e93f2a3d54bb7b40bd502e7e84d8ea8eee48f7/py3dmol-2.5.0-py2.py3-none-any.whl", hash = "sha256:82724b2e509557a4c825a26064ffacebb24a551bca17f8903e7dbb7fa42c260e", size = 7155, upload-time = "2025-06-03T19:46:46.666Z" },
 ]
 
 [[package]]
@@ -3456,6 +3497,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de", size = 10310, upload-time = "2023-10-24T04:13:40.426Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686", size = 9755, upload-time = "2023-10-24T04:13:38.866Z" },
+]
+
+[[package]]
+name = "simtk"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e1/e3/cc0f449c01642f3e327ed1d582aefdbb3c1757a456e22a33905b1d6f52ff/simtk-0.1.0.tar.gz", hash = "sha256:33ceb80d50cfa0d59614b99d4658c04524bbb98f073404ae3fe6838dc1dd3690", size = 820, upload-time = "2020-12-03T01:42:14.439Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/86/f21c5a4e7ac14f3488fbf786294d7c0d6fea30d67cd2d3d414d200cf2f18/simtk-0.1.0-py2.py3-none-any.whl", hash = "sha256:0ae27900189617aa6a5913b2037f3ca7b5821e7a93926b5ecda0ce9db4e69358", size = 1096, upload-time = "2020-12-03T01:42:12.898Z" },
 ]
 
 [[package]]

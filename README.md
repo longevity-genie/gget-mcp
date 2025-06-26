@@ -120,33 +120,40 @@ uvx is a very nice tool that can run a python package installing it if needed.
 You can run the gget-mcp server directly using uvx without cloning the repository:
 
 ```bash
-# Run the server in streamed http mode (default)
-uvx gget-mcp
+# Run the server in HTTP mode (default)
+uvx gget-mcp server-http
 ```
 
 <details>
 <summary>Other uvx modes (STDIO, HTTP, SSE)</summary>
 
-#### STDIO Mode (for MCP clients that require stdio, can be useful when you want to save files)
+#### STDIO Mode (for MCP clients that require stdio)
 
 ```bash
-# Or explicitly specify stdio mode
-uvx gget-mcp stdio
+# Run the server in stdio mode
+uvx gget-mcp server-stdio
+```
+
+#### STDIO-Local Mode (saves large files locally)
+
+```bash
+# Run the server in stdio-local mode with file saving
+uvx gget-mcp server-local --output-dir ./gget_output
 ```
 
 #### HTTP Mode (Web Server)
 ```bash
 # Run the server in streamable HTTP mode on default (3002) port
-uvx gget-mcp server
+uvx gget-mcp server-http
 
 # Run on a specific port
-uvx gget-mcp server --port 8000
+uvx gget-mcp server-http --port 8000
 ```
 
 #### SSE Mode (Server-Sent Events)
 ```bash
 # Run the server in SSE mode
-uvx gget-mcp sse
+uvx gget-mcp server-sse
 ```
 
 </details>
@@ -173,7 +180,7 @@ Use this configuration for most AI clients. Create or update your MCP configurat
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["gget-mcp", "stdio"]
+      "args": ["gget-mcp", "server-stdio"]
     }
   }
 }
@@ -181,14 +188,14 @@ Use this configuration for most AI clients. Create or update your MCP configurat
 
 ### HTTP Mode Configuration
 
-For HTTP mode, ensure the server is running first with `uvx gget-mcp server`:
+For HTTP mode:
 
 ```json
 {
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["gget-mcp", "server"]
+      "args": ["gget-mcp", "server-http"]
     }
   }
 }
@@ -203,7 +210,7 @@ Use this mode when you want to save large output files (sequences, structures, a
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["gget-mcp", "server", "--transport", "stdio-local", "--output-dir", "./gget_output"]
+      "args": ["gget-mcp", "server-local", "--output-dir", "./gget_output"]
     }
   }
 }
@@ -218,7 +225,7 @@ For local development when you've cloned the repository:
   "mcpServers": {
     "gget-mcp": {
       "command": "uv",
-      "args": ["run", "stdio"],
+      "args": ["run", "server-stdio"],
       "env": {
         "MCP_PORT": "3002",
         "MCP_HOST": "0.0.0.0",
@@ -292,13 +299,16 @@ If you already cloned the repo you can run the server with uv:
 
 ```bash
 # Start the MCP server locally (HTTP mode)
-uv run server
+uv run server-http
 
 # Or start in STDIO mode  
-uv run stdio
+uv run server-stdio
+
+# Or start in STDIO-local mode (saves files locally)
+uv run server-local
 
 # Or start in SSE mode
-uv run sse
+uv run server-sse
 ```
 
 </details>
