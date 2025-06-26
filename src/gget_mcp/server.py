@@ -55,7 +55,8 @@ class GgetMCP(GgetMCPExtended):
             # Register simplified versions with essential parameters only
             
             # Gene information and search tools
-            self.tool(name=f"{self.prefix}search")(self.search_genes_simple)
+            self.tool(name=f"{self.prefix}search")(self.search_simple)
+            self.tool(name=f"{self.prefix}search_genes")(self.search_genes_simple)
             self.tool(name=f"{self.prefix}info")(self.get_gene_info_simple)
             
             # Sequence tools - use local wrapper if in local mode
@@ -109,42 +110,146 @@ class GgetMCP(GgetMCPExtended):
 
     # Simplified method implementations with essential parameters only
     
-    async def search_genes_simple(
+    async def search_simple(
         self, 
         search_terms: Union[str, List[str]], 
         species: str = "homo_sapiens"
     ) -> SearchResult:
-        """Search for genes using gene symbols, names, or synonyms.
+        """General search for any biological terms using gene symbols, names, or synonyms.
+        
+        This is a general search that looks broadly across gene names and descriptions.
+        For specific gene symbol searches, use search_genes_simple instead.
+        
+        Args:
+            search_terms: Search terms, names, or synonyms (e.g., 'cancer' or ['apoptosis', 'death'])
+            species: Target species (e.g., 'homo_sapiens', 'mus_musculus')
+        
+        Returns:
+            SearchResult: DataFrame with search results containing Ensembl IDs and descriptions
+            
+        Example:
+            Input: search_terms='apoptosis', species='homo_sapiens'
+            Output: DataFrame with genes related to apoptosis
+        
+        Note: Searches broadly in "gene name" and "description" sections of Ensembl database.
+        Results are limited to prevent overwhelming LLM context.
+        """
+        # Calculate reasonable limit based on number of search terms
+        # Keep total results small to avoid overwhelming LLM context (target: 2-4KB)
+        if isinstance(search_terms, list):
+            limit = min(15, len(search_terms) * 3)  # More generous for general search
+        else:
+            limit = 10  # Single term gets more results for general search
+            
+        return await super().search_genes(search_terms=search_terms, species=species, limit=limit)
+
+    async def search_genes_simple(
+        self, 
+        search_terms: Union[str, List[str]], 
+        species: str = "homo_sapiens",
+        id_type: str = "gene"
+    ) -> SearchResult:
+        """Search for specific genes using gene symbols with enhanced search strategy.
         
         Use this tool FIRST when you have gene names/symbols and need to find their Ensembl IDs.
         Returns Ensembl IDs which are required for get_gene_info and get_sequences tools.
         
+        IMPORTANT: Due to limitations in Ensembl search, short gene names often fail to find results.
+        For best results, provide descriptive terms along with gene symbols:
+        
+        RECOMMENDED FORMAT: "GENE_SYMBOL descriptive_terms"
+        Examples:
+        - Instead of: "APP" 
+        - Use: "APP amyloid precursor" or "APP amyloid beta precursor protein"
+        - Instead of: "BACE1"
+        - Use: "BACE1 beta secretase" or "BACE1 beta site amyloid precursor"
+        - Instead of: "MAPT"
+        - Use: "MAPT microtubule tau" or "MAPT microtubule associated protein"
+        
+        This function uses AND search for multi-word terms and OR search for single words.
+        
         Args:
-            search_terms: Gene symbols, names, or synonyms (e.g., 'TP53' or ['TP53', 'BRCA1'])
+            search_terms: Gene symbols with descriptive terms (e.g., 'APP amyloid precursor' or ['BACE1 beta secretase', 'MAPT tau'])
             species: Target species (e.g., 'homo_sapiens', 'mus_musculus')
+            id_type: "gene" (default) or "transcript" - whether to return genes or transcripts
         
         Returns:
             SearchResult: DataFrame with gene search results containing Ensembl IDs and descriptions
             
-        Example:
-            Input: search_terms='BRCA1', species='homo_sapiens'
-            Output: DataFrame with columns like 'ensembl_id', 'gene_name', 'description'
+        Example (RECOMMENDED):
+            Input: search_terms='APP amyloid precursor', species='homo_sapiens'
+            Output: DataFrame with APP gene and related genes
+            
+        Example (may fail):
+            Input: search_terms='APP', species='homo_sapiens'
+            Output: May return unrelated genes or no results
         
         Downstream tools that need the Ensembl IDs from this search:
             - get_gene_info: Get detailed gene information  
             - get_sequences: Get DNA/protein sequences
         
-        Note: Only searches in "gene name" and "description" sections of Ensembl database.
-        Results are limited to prevent overwhelming LLM context - use extended search_genes for more results.
+        Note: For general biological term searches without gene focus, use search_simple.
         """
-        # Calculate reasonable limit based on number of search terms
-        # Keep total results small to avoid overwhelming LLM context (target: 2-4KB)
-        if isinstance(search_terms, list):
-            limit = min(10, len(search_terms) * 2)  # Between 5-15 results total
-        else:
-            limit = 5  # Single term gets 5 results max
-            
-        return await super().search_genes(search_terms=search_terms, species=species, limit=limit)
+        import re
+        
+        # Convert to list if single string
+        terms_list = search_terms if isinstance(search_terms, list) else [search_terms]
+        
+        all_results = {}
+        
+        # Process each search term individually with ENSG enhancement
+        for search_term in terms_list:
+            try:
+                # Split search term into words for AND search
+                search_words = search_term.strip().split()
+                
+                print(f"Searching for: {search_words}")
+                
+                # Use AND mode for multi-word terms, OR for single words
+                search_mode = "and" if len(search_words) > 1 else "or"
+                search_limit = 10 if search_mode == "and" else 20
+                
+                raw_result = await super().search_genes(
+                    search_terms=search_words, 
+                    species=species, 
+                    id_type=id_type,
+                    andor=search_mode,
+                    limit=search_limit
+                )
+                
+                if isinstance(raw_result, dict) and 'gene_name' in raw_result:
+                    gene_names = raw_result['gene_name']
+                    ensembl_ids = raw_result['ensembl_id']
+                    descriptions = raw_result.get('ensembl_description', {})
+                    
+                    # Take top 5 results from AND search (they should be relevant due to ENSG filter)
+                    selected_indices = list(gene_names.keys())[:5]
+                    
+                    # Add results to combined results
+                    for idx in selected_indices:
+                        result_idx = len(all_results.get('gene_name', {}))
+                        for key in raw_result.keys():
+                            if key not in all_results:
+                                all_results[key] = {}
+                            all_results[key][result_idx] = raw_result[key][idx]
+                            
+            except Exception as e:
+                print(f"Warning: Failed to search for term '{search_term}': {e}")
+                continue
+        
+
+        # If no results found, fall back to original method
+        if not all_results:
+            print(f"Smart search found no results, falling back to original search...")
+            limit = min(10, len(terms_list) * 2)
+            return await super().search_genes(
+                search_terms=search_terms, 
+                species=species, 
+                id_type=id_type,
+                limit=limit
+            )
+        
+        return all_results
 
     async def get_gene_info_simple(
         self, 
@@ -600,11 +705,12 @@ class GgetMCP(GgetMCPExtended):
         Args:
             ensembl_ids: One or more Ensembl gene IDs (e.g., 'ENSG00000141510' or ['ENSG00000141510'])
             translate: If True, returns amino acid sequences; if False, returns nucleotide sequences
-            output_path: Optional specific output path (will generate if not provided)
+            output_path: ABSOLUTE path to output file (e.g., '/home/user/sequences.fasta'). 
+                        AVOID relative paths as they cause file location issues. Auto-generated if not provided.
             format: Output format (currently supports 'fasta')
         
         Returns:
-            LocalFileResult: Contains path, format, and success information instead of sequence data
+            LocalFileResult: Contains ABSOLUTE path, format, and success information instead of sequence data
         """
         return await super().get_sequences_local(
             ensembl_ids=ensembl_ids, 
@@ -625,11 +731,12 @@ class GgetMCP(GgetMCPExtended):
         Args:
             pdb_id: PDB ID to query (e.g., '7S7U', '2GS6')
             resource: Type of information - 'pdb' (structure), 'entry', 'pubmed', 'assembly'
-            output_path: Optional specific output path (will generate if not provided)
+            output_path: ABSOLUTE path to output file (e.g., '/home/user/structure.pdb'). 
+                        AVOID relative paths as they cause file location issues. Auto-generated if not provided.
             format: Output format (currently supports 'pdb')
         
         Returns:
-            LocalFileResult: Contains path, format, and success information instead of structure data
+            LocalFileResult: Contains ABSOLUTE path, format, and success information instead of structure data
         """
         return await super().get_pdb_structure_local(
             pdb_id=pdb_id, 
@@ -647,12 +754,13 @@ class GgetMCP(GgetMCPExtended):
         """Predict protein structure using AlphaFold and save to local file.
         
         Args:
-            sequence: Amino acid sequence (string), list of sequences, or path to FASTA file
-            output_path: Optional specific output path (will generate if not provided)
+            sequence: Amino acid sequence (string), list of sequences, or ABSOLUTE path to FASTA file
+            output_path: ABSOLUTE path to output file (e.g., '/home/user/prediction.pdb'). 
+                        AVOID relative paths as they cause file location issues. Auto-generated if not provided.
             format: Output format (currently supports 'pdb')
         
         Returns:
-            LocalFileResult: Contains path, format, and success information instead of structure data
+            LocalFileResult: Contains ABSOLUTE path, format, and success information instead of structure data
         """
         return await super().alphafold_predict_local(
             sequence=sequence, 
@@ -669,12 +777,13 @@ class GgetMCP(GgetMCPExtended):
         """Align sequences using MUSCLE and save to local file.
         
         Args:
-            sequences: List of sequences or path to FASTA file containing sequences to be aligned
-            output_path: Optional specific output path (will generate if not provided)
+            sequences: List of sequences or ABSOLUTE path to FASTA file containing sequences to be aligned
+            output_path: ABSOLUTE path to output file (e.g., '/home/user/alignment.fasta'). 
+                        AVOID relative paths as they cause file location issues. Auto-generated if not provided.
             format: Output format ('fasta' for FASTA format, 'afa' for aligned FASTA format)
         
         Returns:
-            LocalFileResult: Contains path, format, and success information instead of alignment data
+            LocalFileResult: Contains ABSOLUTE path, format, and success information instead of alignment data
         """
         return await super().muscle_align_local(
             sequences=sequences, 
@@ -692,13 +801,14 @@ class GgetMCP(GgetMCPExtended):
         """Align sequences using DIAMOND and save to local file.
         
         Args:
-            sequences: Query sequences (string, list) or path to FASTA file with sequences to align against reference
-            reference: Reference sequences (string, list) or path to FASTA file with reference sequences
-            output_path: Optional specific output path (will generate if not provided)
+            sequences: Query sequences (string, list) or ABSOLUTE path to FASTA file with sequences to align against reference
+            reference: Reference sequences (string, list) or ABSOLUTE path to FASTA file with reference sequences
+            output_path: ABSOLUTE path to output file (e.g., '/home/user/alignment.json'). 
+                        AVOID relative paths as they cause file location issues. Auto-generated if not provided.
             format: Output format ('json' recommended, 'tsv' also supported)
         
         Returns:
-            LocalFileResult: Contains path, format, and success information instead of alignment data
+            LocalFileResult: Contains ABSOLUTE path, format, and success information instead of alignment data
         """
         return await super().diamond_align_local(
             sequences=sequences, 
