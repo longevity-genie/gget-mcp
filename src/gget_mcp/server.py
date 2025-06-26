@@ -135,8 +135,16 @@ class GgetMCP(GgetMCPExtended):
             - get_sequences: Get DNA/protein sequences
         
         Note: Only searches in "gene name" and "description" sections of Ensembl database.
+        Results are limited to prevent overwhelming LLM context - use extended search_genes for more results.
         """
-        return await super().search_genes(search_terms=search_terms, species=species)
+        # Calculate reasonable limit based on number of search terms
+        # Keep total results small to avoid overwhelming LLM context (target: 2-4KB)
+        if isinstance(search_terms, list):
+            limit = min(10, len(search_terms) * 2)  # Between 5-15 results total
+        else:
+            limit = 5  # Single term gets 5 results max
+            
+        return await super().search_genes(search_terms=search_terms, species=species, limit=limit)
 
     async def get_gene_info_simple(
         self, 
@@ -235,8 +243,9 @@ class GgetMCP(GgetMCPExtended):
             Output: DataFrame with BLAST hits, E-values, scores, and alignments
         
         Note: NCBI server rule: Run scripts weekends or 9pm-5am ET weekdays for >50 searches
+        Results are limited to 10 hits to prevent overwhelming LLM context - use extended blast_sequence for more results.
         """
-        return await super().blast_sequence(sequence=sequence, program=program, database=database)
+        return await super().blast_sequence(sequence=sequence, program=program, database=database, limit=10)
 
     async def blat_sequence_simple(
         self, 
@@ -314,13 +323,15 @@ class GgetMCP(GgetMCPExtended):
             
         Example (correlation):
             Input: gene="STAT4", which="correlation"
-            Output: DataFrame with 100 most correlated genes and Pearson correlation coefficients
+            Output: DataFrame with 20 most correlated genes and Pearson correlation coefficients
             
         Example (tissue):
             Input: gene="STAT4", which="tissue", species="human"  
             Output: DataFrame with tissue expression levels across human samples
+            
+        Results are limited to 20 correlated genes to prevent overwhelming LLM context - use extended archs4_expression for more results.
         """
-        return await super().archs4_expression(gene=gene, which=which, species=species)
+        return await super().archs4_expression(gene=gene, which=which, species=species, gene_count=20)
 
     async def enrichr_analysis_simple(
         self, 
@@ -473,8 +484,9 @@ class GgetMCP(GgetMCPExtended):
             Output: Mutation data including positions, amino acid changes, cancer types
             
         Note: This tool accepts gene symbols directly, no need for Ensembl ID conversion.
+        Results are limited to 25 mutations to prevent overwhelming LLM context - use extended cosmic_search for more results.
         """
-        return await super().cosmic_search(searchterm=searchterm, cosmic_tsv_path=cosmic_tsv_path)
+        return await super().cosmic_search(searchterm=searchterm, cosmic_tsv_path=cosmic_tsv_path, limit=25)
 
     async def mutate_sequences_simple(
         self, 
@@ -520,8 +532,10 @@ class GgetMCP(GgetMCPExtended):
         Example workflow:
             1. search_genes('APOE') → 'ENSG00000141510'
             2. opentargets_analysis('ENSG00000141510') → disease associations
+            
+        Results are limited to 20 associations to prevent overwhelming LLM context - use extended opentargets_analysis for more results.
         """
-        return await super().opentargets_analysis(ensembl_id=ensembl_id, resource=resource)
+        return await super().opentargets_analysis(ensembl_id=ensembl_id, resource=resource, limit=20)
 
     async def cellxgene_query_simple(
         self, 
@@ -541,13 +555,15 @@ class GgetMCP(GgetMCPExtended):
             species: Target species - 'homo_sapiens' or 'mus_musculus'
         
         Returns:
-            Dict[str, Any]: AnnData object or DataFrame with single-cell expression data and metadata
+            Dict[str, Any]: Metadata DataFrame only (to prevent overwhelming LLM context)
         
         Example:
             Input: gene=['ACE2'], tissue=['lung'], cell_type=['alveolar epithelial cell']
-            Output: Single-cell expression data for ACE2 in lung alveolar epithelial cells
+            Output: Metadata about single-cell datasets containing ACE2 in lung alveolar epithelial cells
+            
+        Note: Returns metadata only to keep response size manageable - use extended cellxgene_query for full expression data.
         """
-        return await super().cellxgene_query(gene=gene, tissue=tissue, cell_type=cell_type, species=species)
+        return await super().cellxgene_query(gene=gene, tissue=tissue, cell_type=cell_type, species=species, meta_only=True)
 
     async def setup_databases_simple(
         self, 
