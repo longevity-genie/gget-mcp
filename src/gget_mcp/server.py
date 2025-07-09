@@ -14,7 +14,6 @@ from .server_ext import GgetMCPExtended, SearchResult, SequenceResult, Structure
 
 class TransportType(str, Enum):
     STDIO = "stdio"
-    STDIO_LOCAL = "stdio-local"
     STREAMABLE_HTTP = "streamable-http"
     SSE = "sse"
 
@@ -59,8 +58,7 @@ class GgetMCP(GgetMCPExtended):
             self.tool(name=f"{self.prefix}search_genes")(self.search_genes_simple)
             self.tool(name=f"{self.prefix}info")(self.get_gene_info_simple)
             
-            # Sequence tools - use local wrapper if in local mode
-            if self.transport_mode == "stdio-local":
+            if self.transport_mode == "stdio":
                 self.tool(name=f"{self.prefix}seq")(self.get_sequences_local_simple)
             else:
                 self.tool(name=f"{self.prefix}seq")(self.get_sequences_simple)
@@ -73,7 +71,7 @@ class GgetMCP(GgetMCPExtended):
             self.tool(name=f"{self.prefix}blat")(self.blat_sequence_simple)
             
             # Alignment tools - use local wrappers if in local mode
-            if self.transport_mode == "stdio-local":
+            if self.transport_mode == "stdio":
                 self.tool(name=f"{self.prefix}muscle")(self.muscle_align_local_simple)
                 self.tool(name=f"{self.prefix}diamond")(self.diamond_align_local_simple)
             else:
@@ -86,7 +84,7 @@ class GgetMCP(GgetMCPExtended):
             self.tool(name=f"{self.prefix}bgee")(self.bgee_orthologs_simple)
             
             # Protein structure and function - use local wrappers if in local mode
-            if self.transport_mode == "stdio-local":
+            if self.transport_mode == "stdio":
                 self.tool(name=f"{self.prefix}pdb")(self.get_pdb_structure_local_simple)
                 self.tool(name=f"{self.prefix}alphafold")(self.alphafold_predict_local_simple)
             else:
@@ -700,7 +698,7 @@ class GgetMCP(GgetMCPExtended):
         output_path: Optional[str] = None,
         format: Literal["fasta"] = "fasta"
     ) -> LocalFileResult:
-        """Fetch sequences and save to local file in stdio-local mode.
+        """Fetch sequences and save to local file in stdio mode.
         
         PREREQUISITE: Use search_genes first to get Ensembl IDs from gene names/symbols.
         
@@ -728,7 +726,7 @@ class GgetMCP(GgetMCPExtended):
         output_path: Optional[str] = None,
         format: Literal["pdb"] = "pdb"
     ) -> LocalFileResult:
-        """Fetch PDB structure and save to local file in stdio-local mode.
+        """Fetch PDB structure and save to local file in stdio mode.
         
         Args:
             pdb_id: PDB ID to query (e.g., '7S7U', '2GS6')
@@ -831,43 +829,35 @@ cli_app = typer.Typer(help="gget MCP Server CLI")
 def server(
     host: Annotated[str, typer.Option(help="Host to run the server on.")] = DEFAULT_HOST,
     port: Annotated[int, typer.Option(help="Port to run the server on.")] = DEFAULT_PORT,
-    transport: Annotated[str, typer.Option(help="Transport type: stdio, stdio-local, streamable-http, or sse")] = DEFAULT_TRANSPORT,
-    output_dir: Annotated[Optional[str], typer.Option(help="Output directory for local files (stdio-local mode)")] = None,
+    transport: Annotated[str, typer.Option(help="Transport type: stdio, streamable-http, or sse")] = DEFAULT_TRANSPORT,
+    output_dir: Annotated[Optional[str], typer.Option(help="Output directory for local files (stdio mode)")] = None,
     extended: Annotated[bool, typer.Option(help="Use extended mode with all parameters (fallback to full API)")] = False
 ):
     """Runs the gget MCP server."""
     # Validate transport value
-    if transport not in ["stdio", "stdio-local", "streamable-http", "sse"]:
-        typer.echo(f"Invalid transport: {transport}. Must be one of: stdio, stdio-local, streamable-http, sse")
+    if transport not in ["stdio","streamable-http", "sse"]:
+        typer.echo(f"Invalid transport: {transport}. Must be one of: stdio, streamable-http, sse")
         raise typer.Exit(1)
         
     app = create_app(transport_mode=transport, output_dir=output_dir, extended_mode=extended)
 
     # Different transports need different arguments
-    if transport in ["stdio", "stdio-local"]:
+    if transport in ["stdio"]:
         app.run(transport="stdio")  # Both stdio modes use stdio transport
     else:
         app.run(transport=transport, host=host, port=port)
 
-@cli_app.command(name="server-stdio")
-def server_stdio(
+@cli_app.command(name="stdio")
+def stdio(
     extended: Annotated[bool, typer.Option(help="Use extended mode with all parameters (fallback to full API)")] = False
 ):
     """Runs the gget MCP server in stdio mode (standard input/output)."""
     app = create_app(transport_mode="stdio", extended_mode=extended)
     app.run(transport="stdio")
 
-@cli_app.command(name="server-local")
-def server_local(
-    output_dir: Annotated[Optional[str], typer.Option(help="Output directory for local files")] = None,
-    extended: Annotated[bool, typer.Option(help="Use extended mode with all parameters (fallback to full API)")] = False
-):
-    """Runs the gget MCP server in stdio-local mode (saves large files locally)."""
-    app = create_app(transport_mode="stdio-local", output_dir=output_dir, extended_mode=extended)
-    app.run(transport="stdio")
 
-@cli_app.command(name="server-http")
-def server_http(
+@cli_app.command(name="http")
+def server(
     host: Annotated[str, typer.Option(help="Host to run the server on.")] = DEFAULT_HOST,
     port: Annotated[int, typer.Option(help="Port to run the server on.")] = DEFAULT_PORT,
     output_dir: Annotated[Optional[str], typer.Option(help="Output directory for local files")] = None,
@@ -877,14 +867,14 @@ def server_http(
     app = create_app(transport_mode="streamable-http", output_dir=output_dir, extended_mode=extended)
     app.run(transport="streamable-http", host=host, port=port)
 
-@cli_app.command(name="server-sse")
-def server_sse(
+@cli_app.command(name="sse")
+def sse(
     host: Annotated[str, typer.Option(help="Host to run the server on.")] = DEFAULT_HOST,
     port: Annotated[int, typer.Option(help="Port to run the server on.")] = DEFAULT_PORT,
     output_dir: Annotated[Optional[str], typer.Option(help="Output directory for local files")] = None,
     extended: Annotated[bool, typer.Option(help="Use extended mode with all parameters (fallback to full API)")] = False
 ):
-    """Runs the gget MCP server in Server-Sent Events (SSE) mode."""
+    """Runs the gget MCP server in Sent Events (SSE) mode."""
     app = create_app(transport_mode="sse", output_dir=output_dir, extended_mode=extended)
     app.run(transport="sse", host=host, port=port)
 

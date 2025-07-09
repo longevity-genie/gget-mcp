@@ -2,7 +2,7 @@
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["gget-mcp", "server-http"]
+      "args": ["--from", "gget-mcp", "stdio", "--output-dir", "./gget_output"]
     }
   }
 } 

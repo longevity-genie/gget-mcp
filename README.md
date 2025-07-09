@@ -180,7 +180,7 @@ Use this configuration for most AI clients. Create or update your MCP configurat
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["gget-mcp", "server-stdio"]
+      "args": ["--from", "gget-mcp", "stdio"]
     }
   }
 }
@@ -195,7 +195,7 @@ For HTTP mode:
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["gget-mcp", "server-http"]
+      "args": ["--from", "gget-mcp", "server"]
     }
   }
 }
@@ -210,37 +210,12 @@ Use this mode when you want to save large output files (sequences, structures, a
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["gget-mcp", "server-local", "--output-dir", "./gget_output"]
+      "args": ["--from", "gget-mcp", "stdio", "--output-dir", "./gget_output"]
     }
   }
 }
 ```
 
-### Local Development Configuration
-
-For local development when you've cloned the repository:
-
-```json
-{
-  "mcpServers": {
-    "gget-mcp": {
-      "command": "uv",
-      "args": ["run", "server-stdio"],
-      "env": {
-        "MCP_PORT": "3002",
-        "MCP_HOST": "0.0.0.0",
-        "MCP_TRANSPORT": "stdio"
-      }
-    }
-  }
-}
-```
-
-**Files Available:**
-- **STDIO mode:** `mcp-config-stdio.json`
-- **HTTP mode:** `mcp-config.json` 
-- **STDIO-Local mode:** `mcp-config-stdio-local.json`
-- **Local development:** `mcp-config-stdio-debug.json`
 
 ### Configuration Video Tutorial
 
@@ -255,17 +230,7 @@ If you want to inspect the methods provided by the MCP server, use npx (you may 
 
 For STDIO mode with uvx:
 ```bash
-npx @modelcontextprotocol/inspector --config mcp-config-stdio.json --server gget-mcp
-```
-
-For HTTP mode (ensure server is running first):
-```bash
 npx @modelcontextprotocol/inspector --config mcp-config.json --server gget-mcp
-```
-
-For local development:
-```bash
-npx @modelcontextprotocol/inspector --config mcp-config-stdio-debug.json --server gget-mcp
 ```
 
 You can also run the inspector manually and configure it through the interface:
@@ -273,7 +238,7 @@ You can also run the inspector manually and configure it through the interface:
 npx @modelcontextprotocol/inspector
 ```
 
-After that you can explore the tools and resources with MCP Inspector at http://127.0.0.1:6274 (note, if you run inspector several times it can change port)
+After that you can explore the tools and resources with MCP Inspector at which is usually at 6274 port (note, if you run inspector several times it can change port)
 
 </details>
 
@@ -299,13 +264,10 @@ If you already cloned the repo you can run the server with uv:
 
 ```bash
 # Start the MCP server locally (HTTP mode)
-uv run server-http
+uv run server
 
 # Or start in STDIO mode  
-uv run server-stdio
-
-# Or start in STDIO-local mode (saves files locally)
-uv run server-local
+uv run stdio
 
 # Or start in SSE mode
 uv run server-sse

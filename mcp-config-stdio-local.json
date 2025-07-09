@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "gget-mcp": {
-      "command": "uvx",
-      "args": ["gget-mcp", "server-local", "--output-dir", "./gget_output"]
-    }
-  }
-} 

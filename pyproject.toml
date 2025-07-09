@@ -1,6 +1,6 @@
 [project]
 name = "gget-mcp"
-version = "0.2.4"
+version = "0.2.5"
 description = "MCP server for gget bioinformatics library"
 readme = "README.md"
 authors = [
@@ -23,6 +23,9 @@ dependencies = [
 
 [project.scripts]
 gget-mcp = "gget_mcp.server:cli_app"
+stdio = "gget_mcp.server:stdio"
+server = "gget_mcp.server:server"
+sse = "gget_mcp.server:sse"
 
 [build-system]
 requires = ["hatchling"]
