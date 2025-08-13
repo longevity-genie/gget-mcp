@@ -121,7 +121,7 @@ You can run the gget-mcp server directly using uvx without cloning the repositor
 
 ```bash
 # Run the server in HTTP mode (default)
-uvx gget-mcp server-http
+uvx gget-mcp http
 ```
 
 <details>
@@ -131,29 +131,22 @@ uvx gget-mcp server-http
 
 ```bash
 # Run the server in stdio mode
-uvx gget-mcp server-stdio
-```
-
-#### STDIO-Local Mode (saves large files locally)
-
-```bash
-# Run the server in stdio-local mode with file saving
-uvx gget-mcp server-local --output-dir ./gget_output
+uvx gget-mcp stdio
 ```
 
 #### HTTP Mode (Web Server)
 ```bash
 # Run the server in streamable HTTP mode on default (3002) port
-uvx gget-mcp server-http
+uvx gget-mcp http
 
 # Run on a specific port
-uvx gget-mcp server-http --port 8000
+uvx gget-mcp http --port 8000
 ```
 
 #### SSE Mode (Server-Sent Events)
 ```bash
 # Run the server in SSE mode
-uvx gget-mcp server-sse
+uvx gget-mcp sse
 ```
 
 </details>
@@ -173,14 +166,15 @@ We provide preconfigured JSON files for different use cases. Here are the actual
 
 ### STDIO Mode Configuration (Recommended)
 
-Use this configuration for most AI clients. Create or update your MCP configuration file:
+Use this configuration for most AI clients. Use this mode when you want to save large output files (sequences, structures, alignments) to disk instead of returning them as text.
+Create or update your MCP configuration file:
 
 ```json
 {
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["--from", "gget-mcp", "stdio"]
+      "args": ["--from", "gget-mcp@latest", "stdio"]
     }
   }
 }
@@ -195,27 +189,11 @@ For HTTP mode:
   "mcpServers": {
     "gget-mcp": {
       "command": "uvx",
-      "args": ["--from", "gget-mcp", "server"]
+      "args": ["--from", "gget-mcp@latest", "server"]
     }
   }
 }
 ```
-
-### STDIO-Local Mode Configuration (File Saving)
-
-Use this mode when you want to save large output files (sequences, structures, alignments) to disk instead of returning them as text:
-
-```json
-{
-  "mcpServers": {
-    "gget-mcp": {
-      "command": "uvx",
-      "args": ["--from", "gget-mcp", "stdio", "--output-dir", "./gget_output"]
-    }
-  }
-}
-```
-
 
 ### Configuration Video Tutorial
 
@@ -270,7 +248,7 @@ uv run server
 uv run stdio
 
 # Or start in SSE mode
-uv run server-sse
+uv run sse
 ```
 
 </details>

@@ -4,7 +4,8 @@ version = "0.2.5"
 description = "MCP server for gget bioinformatics library"
 readme = "README.md"
 authors = [
-    { name = "antonkulaga", email = "antonkulaga@gmail.com" }
+    { name = "antonkulaga", email = "antonkulaga@gmail.com" },
+    { name = "Newton Winter", email = "isoutthere@gmail.com" }
 ]
 requires-python = ">=3.10"
 dependencies = [

@@ -1,0 +1,71 @@
+"@context": https://schema.org
+"@type": SoftwareApplication
+"@id": https://github.com/longevity-genie/gget-mcp
+
+identifier: longevity-genie/gget-mcp
+
+name: Holy-BIO-MCP's gget server
+
+description: >
+  A Model Context Protocol server for the gget bioinformatics library.
+See details about gget: https://pachterlab.github.io/gget/
+
+codeRepository: https://github.com/longevity-genie/gget-mcp
+
+url: https://github.com/longevity-genie/gget-mcp/blob/main/README.md
+
+maintainer:
+  - "@type": Person
+    name: Anton Kulaga
+    identifier: antonkulaga
+    url: https://github.com/antonkulaga
+  - "@type": Person
+    name: Newton Winter
+    identifier: winternewt
+    url: https://github.com/winternewt
+
+license: https://spdx.org/licenses/MIT.html
+
+applicationCategory: UtilitiesApplication
+
+keywords:
+  - gget
+  - holy-bio-mcp
+  - bioinformatics
+  - genomics
+  - ncbi
+  - enrichr
+  - ensembl
+  - uniprot
+  - alphafold
+  - ucsc
+
+datePublished: "2025-08-13"
+
+operatingSystem:
+  - Cross-platform
+
+programmingLanguage:
+  - Python
+
+featureList:
+  - gget_search - General biological term search across gene names and descriptions using Ensembl database
+  - gget_search_genes - Enhanced gene symbol search with batch processing and descriptive term support
+  - gget_info - Detailed gene/transcript metadata retrieval using Ensembl IDs from multiple databases
+  - gget_seq - Fetch nucleotide/amino acid sequences (FASTA) from genes or transcripts via Ensembl
+  - gget_ref - Download reference genomes and annotations (GTF, FASTA) by species from Ensembl
+  - gget_blast - BLAST nucleotide/amino acid sequences against NCBI databases (nt, nr, swissprot)
+  - gget_blat - BLAT sequences against UCSC genome assemblies for genomic coordinate mapping
+  - gget_muscle - Multiple sequence alignment using MUSCLE v5 algorithm for DNA/protein sequences
+  - gget_diamond - Fast protein sequence alignment using DIAMOND algorithm with reference sequences
+  - gget_archs4 - Find correlated genes or tissue expression atlas using ARCHS4 RNA-seq database
+  - gget_enrichr - Functional enrichment analysis on gene lists using Enrichr (KEGG, GO, ChEA)
+  - gget_bgee - Get orthologs across species or expression data from Bgee comparative database
+  - gget_pdb - Query RCSB PDB for protein structures/metadata using PDB IDs
+  - gget_alphafold - Predict protein 3D structure using simplified AlphaFold v2.3.0 algorithm
+  - gget_elm - Predict Eukaryotic Linear Motifs from amino acid sequences or UniProt IDs
+  - gget_cosmic - Search COSMIC database for cancer mutations by gene symbol or download data
+  - gget_mutate - Apply mutations to nucleotide sequences using standard annotation formats
+  - gget_opentargets - Query OpenTargets for diseases, drugs, and clinical data by Ensembl ID
+  - gget_cellxgene - Query single-cell RNA-seq data from CZ CELLxGENE Discover using Census
+  - gget_setup - Install third-party dependencies for gget modules (alphafold, cellxgene, elm)
