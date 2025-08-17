@@ -6,6 +6,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/longevity-genie/gget-mcp)](https://archestra.ai/mcp-catalog/longevity-genie__gget-mcp)
+
 MCP (Model Context Protocol) server for the [gget](https://github.com/pachterlab/gget) bioinformatics library.
 
 ![gget-mcp Example](images/screenshot_example.png)
