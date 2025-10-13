@@ -5,12 +5,19 @@ import os
 from enum import Enum
 from typing import List, Optional, Union, Dict, Any, Literal
 from pathlib import Path
+from importlib.metadata import version, PackageNotFoundError
 
 import typer
 from typing_extensions import Annotated
 from fastmcp import FastMCP
 
 from .server_ext import GgetMCPExtended, SearchResult, SequenceResult, StructureResult, LocalFileResult
+
+# Get package version
+try:
+    __version__ = version("gget-mcp")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 class TransportType(str, Enum):
     STDIO = "stdio"
@@ -27,7 +34,7 @@ class GgetMCP(GgetMCPExtended):
     
     def __init__(
         self, 
-        name: str = "gget MCP Server",
+        name: str = f"gget MCP Server v{__version__}",
         prefix: str = "gget_",
         transport_mode: str = "stdio",
         output_dir: Optional[str] = None,
