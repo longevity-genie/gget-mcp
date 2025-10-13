@@ -224,6 +224,215 @@ After that you can explore the tools and resources with MCP Inspector at which i
 
 Simply point your AI client (like Cursor, Windsurf, ClaudeDesktop, VS Code with Copilot, or [others](https://github.com/punkpeye/awesome-mcp-clients)) to use the appropriate configuration file from the repository.
 
+## Platform-Specific Setup Guides
+
+### Claude Desktop + gget_mcp Step-by-Step Guide (Windows)
+
+<details>
+<summary>Comprehensive Windows setup guide with Google Drive integration</summary>
+
+#### Overview
+This guide will walk you through setting up Claude Desktop with the gget_mcp extension and Google Drive integration on Windows. By the end, you'll be able to use Claude to fetch biological data (like gene sequences) and save them directly to your Google Drive folder with offline access.
+
+#### Prerequisites
+- Windows PC with administrator access
+- Google account
+- Stable internet connection
+
+#### Step 1: Set Up Google Drive for Desktop with Offline Access
+
+1. Download and install [Google Drive for Desktop](https://www.google.com/drive/download/)
+2. Launch the application and sign in with your user account
+3. Connect your project's shared Google account (if applicable)
+4. **Configure offline access for your working folder:**
+   - Navigate to the folder you want to work with in Google Drive
+   - Right-click on the folder (e.g., "work" or your project folder)
+   - Select **"Available offline"** from the context menu
+   - This makes the folder accessible at a path like `C:\GDrive\holy-bio-mcp\My Disk\work`
+
+   **Important:** This is different from just syncing - offline access ensures the files are locally available while still being part of your Google Drive structure.
+
+#### Step 2: Install Claude Desktop
+
+1. Download [Claude Desktop](https://claude.ai/download) for Windows
+2. Run the installer and follow the setup wizard
+3. Sign in with your Anthropic/Claude account
+4. Complete the initial setup
+
+#### Step 3: Install uv Package Manager
+
+1. Install `uv` using one of these methods:
+
+   **Option A: Using winstall**
+   - Visit [https://winstall.app/apps/astral-sh.uv](https://winstall.app/apps/astral-sh.uv)
+   - Follow installation instructions
+
+   **Option B: Using PowerShell**
+   ```powershell
+   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+2. Restart your terminal after installation
+
+#### Step 4: Install Node.js
+
+You can install Node.js using either method:
+
+**Option A: Native Installer**
+1. Visit [https://nodejs.org/en/download](https://nodejs.org/en/download)
+2. Download the Windows installer (LTS version recommended)
+3. Run the installer with default settings
+
+**Option B: Using Chocolatey**
+```powershell
+choco install nodejs
+```
+
+Both methods work equally well - choose whichever you prefer.
+
+#### Step 5: Verify Installation & Cache Packages
+
+Open Command Prompt or PowerShell and run:
+
+```bash
+uvx --from gget-mcp@latest stdio
+```
+
+**Expected behavior:**
+- The command should start without errors
+- Packages will be downloaded and cached
+- If it runs successfully, everything is configured correctly
+- You can press `Ctrl+C` to stop it
+
+#### Step 6: Configure Claude Desktop
+
+##### 6.1: Enable Filesystem Extension
+
+1. Open Claude Desktop
+2. Go to **Settings** (gear icon)
+3. Navigate to the **"Extensions"** tab in the left sidebar
+4. Enable the **Filesystem** Extension
+5. Add your Google Drive offline folder to the allowed directories (e.g., `C:\GDrive\holy-bio-mcp\My Disk\work`)
+
+**Note:** The Filesystem extension is built into Claude Desktop and uses MCP under the hood, but it's managed directly by the application. You don't need to configure it in the JSON file.
+
+##### 6.2: Add gget_mcp Server
+
+1. In the same manner, go to **Settings**, navigate to the **"Developer"** tab in the left sidebar
+2. In **Developer** settings tab, click **"Edit Config"** button
+3. This will open the `claude_desktop_config.json` file
+4. Edit it and add the gget_mcp server configuration:
+
+```json
+{
+  "mcpServers": {
+    "gget": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "gget-mcp@latest",
+        "stdio"
+      ]
+    }
+  }
+}
+```
+
+5. Save the configuration file
+
+#### Step 7: Restart Claude Desktop
+
+1. Completely close Claude Desktop (check system tray)
+2. Restart the application
+3. **Note:** On first launch, you might experience a timeout - this is normal
+4. If needed, restart Claude Desktop a second time
+
+#### Step 8: Verify Extensions Are Active
+
+1. Open Claude Desktop Settings
+2. Go to the **Developer** tab
+3. Confirm that both components are enabled:
+   - ✅ **Filesystem Extension** - should show your configured Google Drive path and show "Running" status
+   - ✅ **gget MCP Server** - should show "Running" status
+
+#### Step 9: Test the Setup
+
+Now let's verify everything works! In Claude Desktop, create a new chat.
+Click "Search and tools" icon, select and enable both gget_mcp and filesystem
+
+Try this prompt:
+
+```text
+Please search for the COL1A1 gene, retrieve its protein sequence, 
+and save it to C:\GDrive\holy-bio-mcp\My Disk\work\test_sequences\ as a FASTA file.
+```
+
+**Expected result:**
+- Claude will use gget_mcp to search for the gene
+- It will fetch the sequence data
+- It will save the file to your specified folder
+- The file will sync to Google Drive automatically
+- Claude will be able to read it using Filesystem Extension.
+
+#### Troubleshooting
+
+##### MCP Server Not Connecting
+
+- Ensure `uv` and `node` are in your system PATH
+- Try running the verification command again from Step 5
+- Restart Claude Desktop completely
+
+##### Filesystem Permission Errors
+
+- Check that the Filesystem Extension has access to your Google Drive folder
+- Verify the folder has offline access enabled in Google Drive
+- Try running Claude Desktop as administrator
+- Ensure the path is correct (use the exact path shown in File Explorer)
+
+##### Timeout on First Launch
+
+- This is normal - simply restart Claude Desktop
+- Wait 10-15 seconds before making requests
+
+##### gget Commands Not Working
+
+- Ensure internet connection is stable (gget fetches from online databases)
+- Check that the gget_mcp server shows as "Active" in settings
+- Try the verification command from Step 5 again
+
+##### Google Drive Offline Access Issues
+
+- Confirm the folder shows a green checkmark in Google Drive for Desktop
+- If files aren't syncing, right-click the folder and re-enable "Available offline"
+- Check that you have enough local disk space for offline files
+
+#### Success! 🎉
+
+If everything works correctly, you now have:
+- ✅ Claude Desktop with MCP capabilities
+- ✅ Access to biological databases via gget_mcp
+- ✅ Direct file operations in your Google Drive offline folder
+- ✅ Automatic cloud synchronization of all results
+
+You can now ask Claude to fetch gene sequences, protein data, perform BLAST searches, and save everything directly to your Google Drive folder with offline access!
+
+#### Example Use Cases
+
+- **Fetch gene sequences:** "Get the DNA sequence for BRCA1 and save it to my Drive"
+- **Protein analysis:** "Find the protein sequence for TP53 and create a markdown report"
+- **Bulk operations:** "Search for all genes related to apoptosis and create a summary table"
+- **Cross-referencing:** "Get information about COL1A1 from Ensembl and UniProt"
+
+#### Additional Resources
+
+- [gget documentation](https://github.com/pachterlab/gget)
+- [Model Context Protocol docs](https://modelcontextprotocol.io/)
+- [Claude Desktop support](https://support.anthropic.com/)
+
+*Guide updated: October 13, 2025*
+
+</details>
+
 ## Repository setup
 
 <details>
