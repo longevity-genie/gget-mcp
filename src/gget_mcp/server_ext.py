@@ -14,6 +14,8 @@ from fastmcp import FastMCP
 from eliot import start_action
 import gget
 
+from .ensembl_bacteria import EnsemblBacteriaClient
+
 class TransportType(str, Enum):
     STDIO = "stdio"
     STDIO_LOCAL = "stdio-local"
@@ -52,7 +54,10 @@ class GgetMCPExtended(FastMCP):
         # Create output directory if in local mode
         if self.transport_mode == "stdio-local":
             self.output_dir.mkdir(parents=True, exist_ok=True)
-            
+
+        # Bacteria REST API client (lazy-loads species index on first ref call)
+        self._bacteria_client = EnsemblBacteriaClient()
+
         self._register_gget_tools()
     
     def _save_to_local_file(
@@ -230,6 +235,11 @@ class GgetMCPExtended(FastMCP):
         
         # Setup and utility functions
         self.tool(name=f"{self.prefix}setup")(self.setup_databases)
+
+        # Bacteria-specific tools (Ensembl REST API)
+        self.tool(name=f"{self.prefix}bacteria_species")(self.bacteria_search_species)
+        self.tool(name=f"{self.prefix}bacteria_search")(self.bacteria_search_genes)
+        self.tool(name=f"{self.prefix}bacteria_ref")(self.bacteria_get_reference)
 
     async def search_genes(
         self, 
@@ -1503,4 +1513,105 @@ class GgetMCPExtended(FastMCP):
             default_prefix = f"diamond_alignment_{str(uuid.uuid4())[:8]}"
             return self._save_to_local_file(result, format, output_path, default_prefix)
 
+    # ------------------------------------------------------------------ #
+    # Bacteria-specific tools (Ensembl REST API)
+    # ------------------------------------------------------------------ #
 
+    async def bacteria_search_species(
+        self,
+        query: str,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """Find bacterial species in Ensembl by name or taxonomy ID.
+
+        Bacterial species names in Ensembl are very long and include strain info
+        (e.g. 'escherichia_coli_str_k_12_substr_mg1655_gca_000005845').
+        Use this tool to discover the correct full species name before using
+        bacteria_search or bacteria_ref.
+
+        Args:
+            query: Partial species name (e.g. 'escherichia coli k-12') or NCBI taxonomy ID (e.g. '511145')
+            limit: Maximum number of results to return. Default: 10
+
+        Returns:
+            List of species with name, display_name, taxonomy_id, assembly info, and division
+
+        Example:
+            Input: query='bacillus subtilis 168'
+            Output: List of matching B. subtilis strains with their full Ensembl names
+
+        Workflow:
+            1. bacteria_species('escherichia coli k-12') → find full species name
+            2. bacteria_search(['dnaA', 'gyrB'], species=full_name) → find gene IDs
+            3. Use existing gget_info / gget_seq with the bacterial gene IDs
+        """
+        with start_action(action_type="gget_bacteria_species", query=query, limit=limit):
+            return self._bacteria_client.search_species(query, limit=limit)
+
+    async def bacteria_search_genes(
+        self,
+        search_terms: Union[str, List[str]],
+        species: str,
+        limit: int = 10,
+    ) -> SearchResult:
+        """Search for bacterial genes by symbol or name.
+
+        Uses the Ensembl REST API (xrefs/symbol endpoint) instead of MySQL,
+        since gget.search() excludes bacteria. Returns results in the same
+        schema as gget_search for consistency.
+
+        PREREQUISITE: Use bacteria_species first to find the full Ensembl species name.
+
+        Args:
+            search_terms: Gene symbol(s) to search — string or list of strings
+                         (e.g. 'dnaA' or ['dnaA', 'gyrB', 'rpoB'])
+            species: Full Ensembl species name from bacteria_species
+                    (e.g. 'escherichia_coli_str_k_12_substr_mg1655_gca_000005845')
+            limit: Maximum results per search term. Default: 10
+
+        Returns:
+            SearchResult: Dict with ensembl_id, gene_name, biotype, chromosome,
+            start, end, strand — same schema as gget_search output
+
+        Example:
+            Input: search_terms=['dnaA', 'gyrB'], species='escherichia_coli_str_k_12_substr_mg1655_gca_000005845'
+            Output: Dict with gene IDs like 'b3702' (dnaA) and 'b3699' (gyrB)
+
+        Downstream tools (work with bacterial IDs as-is):
+            - gget_info: Get detailed gene metadata
+            - gget_seq: Get DNA/protein sequences
+        """
+        with start_action(action_type="gget_bacteria_search", search_terms=search_terms, species=species):
+            terms = search_terms if isinstance(search_terms, list) else [search_terms]
+            return self._bacteria_client.search_genes(terms, species, limit=limit)
+
+    async def bacteria_get_reference(
+        self,
+        species: str,
+        which: str = "all",
+        release: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Get FTP download URLs for a bacterial reference genome from Ensembl.
+
+        Bacteria in Ensembl use a collection-based FTP layout that differs from
+        vertebrate/invertebrate genomes, so gget.ref() cannot retrieve them.
+        This tool resolves the collection number and constructs correct FTP URLs.
+
+        PREREQUISITE: Use bacteria_species first to find the full Ensembl species name.
+
+        Args:
+            species: Full Ensembl species name from bacteria_species
+                    (e.g. 'escherichia_coli_str_k_12_substr_mg1655_gca_000005845')
+            which: Data type(s) to retrieve — 'all', 'dna', 'cdna', 'cds', 'pep', 'gtf', 'ncrna'
+                  Can be comma-separated for multiple types (e.g. 'dna,pep')
+            release: Ensembl Genomes release number. Default: current release
+
+        Returns:
+            Dict with species info and per-datatype URLs + file listings
+
+        Example:
+            Input: species='escherichia_coli_str_k_12_substr_mg1655_gca_000005845', which='dna,pep'
+            Output: Dict with FTP URLs for DNA and protein FASTA files
+        """
+        with start_action(action_type="gget_bacteria_ref", species=species, which=which):
+            return self._bacteria_client.get_reference_urls(species, which=which, release=release)
