@@ -113,6 +113,11 @@ class GgetMCP(GgetMCPExtended):
             # Setup and utility functions
             self.tool(name=f"{self.prefix}setup")(self.setup_databases_simple)
 
+            # Bacteria-specific tools
+            self.tool(name=f"{self.prefix}bacteria_species")(self.bacteria_search_species_simple)
+            self.tool(name=f"{self.prefix}bacteria_search")(self.bacteria_search_genes_simple)
+            self.tool(name=f"{self.prefix}bacteria_ref")(self.bacteria_get_reference_simple)
+
     # Simplified method implementations with essential parameters only
     
     async def search_simple(
@@ -696,6 +701,74 @@ class GgetMCP(GgetMCPExtended):
         Note: Available modules requiring setup: 'alphafold', 'cellxgene', 'elm', 'gpt', 'cbio'
         """
         return await super().setup_databases(module=module)
+
+    # Bacteria-specific simplified wrappers
+
+    async def bacteria_search_species_simple(
+        self,
+        query: str,
+    ) -> list:
+        """Find bacterial species in Ensembl by name or taxonomy ID.
+
+        Bacterial species names in Ensembl are very long and include strain info.
+        Use this tool to discover the correct full species name before using
+        bacteria_search or bacteria_ref.
+
+        Args:
+            query: Partial species name (e.g. 'escherichia coli k-12') or NCBI taxonomy ID
+
+        Returns:
+            List of matching species with name, display_name, taxonomy_id, assembly info
+
+        Workflow:
+            1. bacteria_species('escherichia coli k-12') → find full species name
+            2. bacteria_search(['dnaA'], species=full_name) → find gene IDs
+            3. gget_info(gene_id) / gget_seq(gene_id) → existing tools work with bacterial IDs
+        """
+        return await super().bacteria_search_species(query=query, limit=10)
+
+    async def bacteria_search_genes_simple(
+        self,
+        search_terms: Union[str, List[str]],
+        species: str,
+    ) -> SearchResult:
+        """Search for bacterial genes by symbol or name.
+
+        Uses Ensembl REST API since gget_search excludes bacteria.
+        PREREQUISITE: Use bacteria_species first to find the full species name.
+
+        Args:
+            search_terms: Gene symbol(s) — string or list (e.g. 'dnaA' or ['dnaA', 'gyrB'])
+            species: Full Ensembl species name from bacteria_species
+
+        Returns:
+            SearchResult: Dict with ensembl_id, gene_name, biotype, etc.
+
+        Downstream tools (work with bacterial IDs):
+            - gget_info: Get detailed gene metadata
+            - gget_seq: Get DNA/protein sequences
+        """
+        return await super().bacteria_search_genes(
+            search_terms=search_terms, species=species, limit=10
+        )
+
+    async def bacteria_get_reference_simple(
+        self,
+        species: str,
+        which: str = "all",
+    ) -> Dict[str, Any]:
+        """Get FTP download URLs for a bacterial reference genome from Ensembl.
+
+        PREREQUISITE: Use bacteria_species first to find the full species name.
+
+        Args:
+            species: Full Ensembl species name from bacteria_species
+            which: Data type(s) — 'all', 'dna', 'cdna', 'cds', 'pep', 'gtf', 'ncrna'
+
+        Returns:
+            Dict with species info and per-datatype FTP URLs + file listings
+        """
+        return await super().bacteria_get_reference(species=species, which=which)
 
     # Local mode wrapper functions for large data
     async def get_sequences_local_simple(
