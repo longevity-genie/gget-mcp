@@ -97,6 +97,10 @@ If you want to understand more about what the Model Context Protocol is and how 
 
 </details>
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/longevity-genie-gget-mcp).
+
 ## Quick Start
 
 <details>
